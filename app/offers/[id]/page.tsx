@@ -22,9 +22,12 @@ type FilterRange = 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'th
 interface Offer {
   id: number;
   name: string;
+  network: string;       // <--- Deze miste!
   payoutLead: number;
   payoutSale: number;
-  // Voeg hier eventueel andere velden toe als TS daarom zeurt (bijv. capLeads)
+  capLeads?: number;     // Vraagteken (?) betekent: mag ook leeg zijn
+  capRevenue?: number;   // Vraagteken (?) betekent: mag ook leeg zijn
+  status?: string;
 }
 
 // 3. Definieer hoe de HELE API response eruit ziet (DEZE miste je!)
