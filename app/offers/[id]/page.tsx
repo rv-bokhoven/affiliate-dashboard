@@ -31,7 +31,7 @@ interface OfferDetail {
   }[];
 }
 
-type FilterRange = 'this_week' | 'last_week' | 'this_month' | 'this_year' | 'all';
+type FilterRange = 'this_week' | 'last_week' | 'this_month' | 'this_year' | 'last_month' | 'custom' | 'all';
 
 export default function OfferDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
