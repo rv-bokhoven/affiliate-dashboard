@@ -1,6 +1,7 @@
 // app/api/stats/top-offers/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { nl } from 'date-fns/locale';
 
 // Dezelfde datum-helper als in je main stats API (om code te hergebruiken zou je dit in een los bestand kunnen zetten, maar voor nu kopiëren we het even)
 function getDateRange(range: string, customFrom?: string | null, customTo?: string | null) {

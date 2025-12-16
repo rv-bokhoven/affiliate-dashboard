@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { nl } from 'date-fns/locale';
 
 // Helper: Bereken huidige én vorige periode (voor trends)
 function getDateRanges(range: string, customFrom?: string | null, customTo?: string | null) {
