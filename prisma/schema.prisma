@@ -1,0 +1,57 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Model voor je dagelijkse kosten (Google/Microsoft)
+model DailySpend {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  platform  String   // Bijv. "Google" of "Microsoft"
+  amount    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Zorgt dat je niet 2x kosten voor Google op dezelfde dag kunt hebben
+  @@unique([date, platform], name: "date_platform")
+}
+
+// Model voor je Offers
+model Offer {
+  id          Int          @id @default(autoincrement())
+  name        String
+  network     String?
+  payoutLead  Float        @default(0)
+  payoutSale  Float        @default(0)
+
+  // NIEUW: De Caps (Optioneel)
+  capLeads    Int?         
+  capRevenue  Float?
+
+  conversions Conversion[] // Relatie naar conversies
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// Model voor je Conversies (Leads/Sales per dag per offer)
+model Conversion {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  offerId   Int
+  leads     Int      @default(0)
+  sales     Int      @default(0)
+  
+  offer     Offer    @relation(fields: [offerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Zorgt dat je niet 2x data voor dezelfde offer op dezelfde dag hebt
+  @@unique([date, offerId], name: "date_offerId")
+}

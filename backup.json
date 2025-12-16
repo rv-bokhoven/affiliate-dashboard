@@ -1,0 +1,2104 @@
+{
+  "offers": [
+    {
+      "id": 1,
+      "name": "Netsuite",
+      "network": "Partnerize",
+      "payoutLead": 30,
+      "payoutSale": 0,
+      "capLeads": null,
+      "capRevenue": 28000,
+      "createdAt": "2025-12-14T12:39:19.262Z",
+      "updatedAt": "2025-12-14T12:39:19.262Z"
+    },
+    {
+      "id": 2,
+      "name": "Sage Intacct",
+      "network": "Impact",
+      "payoutLead": 125,
+      "payoutSale": 350,
+      "capLeads": null,
+      "capRevenue": null,
+      "createdAt": "2025-12-14T12:47:26.451Z",
+      "updatedAt": "2025-12-14T12:47:26.451Z"
+    },
+    {
+      "id": 3,
+      "name": "Freshbooks",
+      "network": "Awin",
+      "payoutLead": 70,
+      "payoutSale": 200,
+      "capLeads": null,
+      "capRevenue": null,
+      "createdAt": "2025-12-14T12:48:43.826Z",
+      "updatedAt": "2025-12-14T12:50:35.860Z"
+    },
+    {
+      "id": 4,
+      "name": "Striven",
+      "network": "Impact",
+      "payoutLead": 50,
+      "payoutSale": 150,
+      "capLeads": null,
+      "capRevenue": null,
+      "createdAt": "2025-12-14T12:52:06.072Z",
+      "updatedAt": "2025-12-14T12:52:06.072Z"
+    },
+    {
+      "id": 5,
+      "name": "Xero",
+      "network": "Partnerstack",
+      "payoutLead": 0,
+      "payoutSale": 400,
+      "capLeads": null,
+      "capRevenue": null,
+      "createdAt": "2025-12-14T12:55:20.646Z",
+      "updatedAt": "2025-12-14T12:55:20.646Z"
+    }
+  ],
+  "dailySpends": [
+    {
+      "id": 1,
+      "date": "2025-07-03T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 12,
+      "createdAt": "2025-12-14T18:40:41.259Z",
+      "updatedAt": "2025-12-14T18:40:41.259Z"
+    },
+    {
+      "id": 2,
+      "date": "2025-07-03T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:40:41.259Z",
+      "updatedAt": "2025-12-14T18:40:41.259Z"
+    },
+    {
+      "id": 3,
+      "date": "2025-07-04T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 105,
+      "createdAt": "2025-12-14T18:40:52.820Z",
+      "updatedAt": "2025-12-14T18:40:52.820Z"
+    },
+    {
+      "id": 4,
+      "date": "2025-07-04T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:40:52.820Z",
+      "updatedAt": "2025-12-14T18:40:52.820Z"
+    },
+    {
+      "id": 5,
+      "date": "2025-07-05T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 104,
+      "createdAt": "2025-12-14T18:41:05.175Z",
+      "updatedAt": "2025-12-14T18:41:05.175Z"
+    },
+    {
+      "id": 6,
+      "date": "2025-07-05T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:05.175Z",
+      "updatedAt": "2025-12-14T18:41:05.175Z"
+    },
+    {
+      "id": 7,
+      "date": "2025-07-06T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 272,
+      "createdAt": "2025-12-14T18:41:13.921Z",
+      "updatedAt": "2025-12-14T18:41:13.921Z"
+    },
+    {
+      "id": 8,
+      "date": "2025-07-06T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:13.921Z",
+      "updatedAt": "2025-12-14T18:41:13.921Z"
+    },
+    {
+      "id": 9,
+      "date": "2025-07-07T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 88,
+      "createdAt": "2025-12-14T18:41:19.831Z",
+      "updatedAt": "2025-12-14T18:41:19.831Z"
+    },
+    {
+      "id": 10,
+      "date": "2025-07-07T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:19.831Z",
+      "updatedAt": "2025-12-14T18:41:19.831Z"
+    },
+    {
+      "id": 11,
+      "date": "2025-07-08T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 303,
+      "createdAt": "2025-12-14T18:41:28.393Z",
+      "updatedAt": "2025-12-14T18:41:28.393Z"
+    },
+    {
+      "id": 12,
+      "date": "2025-07-08T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:28.393Z",
+      "updatedAt": "2025-12-14T18:41:28.393Z"
+    },
+    {
+      "id": 13,
+      "date": "2025-07-09T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 313,
+      "createdAt": "2025-12-14T18:41:34.387Z",
+      "updatedAt": "2025-12-14T18:41:34.387Z"
+    },
+    {
+      "id": 14,
+      "date": "2025-07-09T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:34.387Z",
+      "updatedAt": "2025-12-14T18:41:34.387Z"
+    },
+    {
+      "id": 15,
+      "date": "2025-07-10T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 317,
+      "createdAt": "2025-12-14T18:41:41.287Z",
+      "updatedAt": "2025-12-14T18:41:41.287Z"
+    },
+    {
+      "id": 16,
+      "date": "2025-07-10T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:41.287Z",
+      "updatedAt": "2025-12-14T18:41:41.287Z"
+    },
+    {
+      "id": 17,
+      "date": "2025-07-11T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 304,
+      "createdAt": "2025-12-14T18:41:48.718Z",
+      "updatedAt": "2025-12-14T18:41:48.718Z"
+    },
+    {
+      "id": 18,
+      "date": "2025-07-11T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:48.718Z",
+      "updatedAt": "2025-12-14T18:41:48.718Z"
+    },
+    {
+      "id": 19,
+      "date": "2025-07-12T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 358,
+      "createdAt": "2025-12-14T18:41:56.068Z",
+      "updatedAt": "2025-12-14T18:41:56.068Z"
+    },
+    {
+      "id": 20,
+      "date": "2025-07-12T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:41:56.068Z",
+      "updatedAt": "2025-12-14T18:41:56.068Z"
+    },
+    {
+      "id": 21,
+      "date": "2025-07-13T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 218,
+      "createdAt": "2025-12-14T18:42:03.067Z",
+      "updatedAt": "2025-12-14T18:42:03.067Z"
+    },
+    {
+      "id": 22,
+      "date": "2025-07-13T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:42:03.067Z",
+      "updatedAt": "2025-12-14T18:42:03.067Z"
+    },
+    {
+      "id": 23,
+      "date": "2025-07-14T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 365,
+      "createdAt": "2025-12-14T18:42:10.737Z",
+      "updatedAt": "2025-12-14T18:42:10.737Z"
+    },
+    {
+      "id": 24,
+      "date": "2025-07-14T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:42:10.737Z",
+      "updatedAt": "2025-12-14T18:42:10.737Z"
+    },
+    {
+      "id": 25,
+      "date": "2025-07-15T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 343,
+      "createdAt": "2025-12-14T18:42:16.305Z",
+      "updatedAt": "2025-12-14T18:42:16.305Z"
+    },
+    {
+      "id": 26,
+      "date": "2025-07-15T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:42:16.305Z",
+      "updatedAt": "2025-12-14T18:42:16.305Z"
+    },
+    {
+      "id": 27,
+      "date": "2025-07-16T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 323,
+      "createdAt": "2025-12-14T18:42:27.358Z",
+      "updatedAt": "2025-12-14T18:42:27.358Z"
+    },
+    {
+      "id": 28,
+      "date": "2025-07-16T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:42:27.358Z",
+      "updatedAt": "2025-12-14T18:42:27.358Z"
+    },
+    {
+      "id": 29,
+      "date": "2025-07-17T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 261,
+      "createdAt": "2025-12-14T18:42:52.286Z",
+      "updatedAt": "2025-12-14T18:42:52.286Z"
+    },
+    {
+      "id": 30,
+      "date": "2025-07-17T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:42:52.286Z",
+      "updatedAt": "2025-12-14T18:42:52.286Z"
+    },
+    {
+      "id": 31,
+      "date": "2025-07-18T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 363,
+      "createdAt": "2025-12-14T18:43:12.285Z",
+      "updatedAt": "2025-12-14T18:43:12.285Z"
+    },
+    {
+      "id": 32,
+      "date": "2025-07-18T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:43:12.285Z",
+      "updatedAt": "2025-12-14T18:43:12.285Z"
+    },
+    {
+      "id": 33,
+      "date": "2025-07-19T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 150,
+      "createdAt": "2025-12-14T18:43:33.271Z",
+      "updatedAt": "2025-12-14T18:43:33.271Z"
+    },
+    {
+      "id": 34,
+      "date": "2025-07-19T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:43:33.271Z",
+      "updatedAt": "2025-12-14T18:43:33.271Z"
+    },
+    {
+      "id": 35,
+      "date": "2025-07-20T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 207,
+      "createdAt": "2025-12-14T18:43:50.537Z",
+      "updatedAt": "2025-12-14T18:43:50.537Z"
+    },
+    {
+      "id": 36,
+      "date": "2025-07-20T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:43:50.537Z",
+      "updatedAt": "2025-12-14T18:43:50.537Z"
+    },
+    {
+      "id": 37,
+      "date": "2025-07-21T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 284,
+      "createdAt": "2025-12-14T18:44:22.837Z",
+      "updatedAt": "2025-12-14T18:44:22.837Z"
+    },
+    {
+      "id": 38,
+      "date": "2025-07-21T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 103,
+      "createdAt": "2025-12-14T18:44:22.837Z",
+      "updatedAt": "2025-12-14T18:44:22.837Z"
+    },
+    {
+      "id": 39,
+      "date": "2025-07-22T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 201,
+      "createdAt": "2025-12-14T18:44:52.153Z",
+      "updatedAt": "2025-12-14T18:44:52.153Z"
+    },
+    {
+      "id": 40,
+      "date": "2025-07-22T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 101,
+      "createdAt": "2025-12-14T18:44:52.153Z",
+      "updatedAt": "2025-12-14T18:44:52.153Z"
+    },
+    {
+      "id": 41,
+      "date": "2025-07-23T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 420,
+      "createdAt": "2025-12-14T18:45:07.051Z",
+      "updatedAt": "2025-12-14T18:45:07.051Z"
+    },
+    {
+      "id": 42,
+      "date": "2025-07-23T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 104,
+      "createdAt": "2025-12-14T18:45:07.051Z",
+      "updatedAt": "2025-12-14T18:45:07.051Z"
+    },
+    {
+      "id": 43,
+      "date": "2025-07-24T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 302,
+      "createdAt": "2025-12-14T18:45:34.544Z",
+      "updatedAt": "2025-12-14T18:45:34.544Z"
+    },
+    {
+      "id": 44,
+      "date": "2025-07-24T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 101,
+      "createdAt": "2025-12-14T18:45:34.544Z",
+      "updatedAt": "2025-12-14T18:45:34.544Z"
+    },
+    {
+      "id": 45,
+      "date": "2025-07-25T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 370,
+      "createdAt": "2025-12-14T18:46:01.384Z",
+      "updatedAt": "2025-12-14T18:46:01.384Z"
+    },
+    {
+      "id": 46,
+      "date": "2025-07-25T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 103,
+      "createdAt": "2025-12-14T18:46:01.384Z",
+      "updatedAt": "2025-12-14T18:46:01.384Z"
+    },
+    {
+      "id": 47,
+      "date": "2025-07-26T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 243,
+      "createdAt": "2025-12-14T18:46:21.748Z",
+      "updatedAt": "2025-12-14T18:46:21.748Z"
+    },
+    {
+      "id": 48,
+      "date": "2025-07-26T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 40,
+      "createdAt": "2025-12-14T18:46:21.748Z",
+      "updatedAt": "2025-12-14T18:46:21.748Z"
+    },
+    {
+      "id": 49,
+      "date": "2025-07-27T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 222,
+      "createdAt": "2025-12-14T18:46:38.965Z",
+      "updatedAt": "2025-12-14T18:46:38.965Z"
+    },
+    {
+      "id": 50,
+      "date": "2025-07-27T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 27,
+      "createdAt": "2025-12-14T18:46:38.965Z",
+      "updatedAt": "2025-12-14T18:46:38.965Z"
+    },
+    {
+      "id": 51,
+      "date": "2025-07-28T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 376,
+      "createdAt": "2025-12-14T18:46:59.335Z",
+      "updatedAt": "2025-12-14T18:46:59.335Z"
+    },
+    {
+      "id": 52,
+      "date": "2025-07-28T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 13,
+      "createdAt": "2025-12-14T18:46:59.335Z",
+      "updatedAt": "2025-12-14T18:46:59.335Z"
+    },
+    {
+      "id": 53,
+      "date": "2025-07-29T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 146,
+      "createdAt": "2025-12-14T18:47:27.437Z",
+      "updatedAt": "2025-12-14T18:47:27.437Z"
+    },
+    {
+      "id": 54,
+      "date": "2025-07-29T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 11,
+      "createdAt": "2025-12-14T18:47:27.437Z",
+      "updatedAt": "2025-12-14T18:47:27.437Z"
+    },
+    {
+      "id": 55,
+      "date": "2025-07-30T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 362,
+      "createdAt": "2025-12-14T18:47:47.013Z",
+      "updatedAt": "2025-12-14T18:47:47.013Z"
+    },
+    {
+      "id": 56,
+      "date": "2025-07-30T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 13,
+      "createdAt": "2025-12-14T18:47:47.013Z",
+      "updatedAt": "2025-12-14T18:47:47.013Z"
+    },
+    {
+      "id": 57,
+      "date": "2025-07-31T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 283,
+      "createdAt": "2025-12-14T18:54:00.099Z",
+      "updatedAt": "2025-12-14T18:54:00.099Z"
+    },
+    {
+      "id": 58,
+      "date": "2025-07-31T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T18:54:00.099Z",
+      "updatedAt": "2025-12-14T18:54:00.099Z"
+    },
+    {
+      "id": 59,
+      "date": "2025-12-01T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 907,
+      "createdAt": "2025-12-14T19:25:08.761Z",
+      "updatedAt": "2025-12-14T19:25:08.761Z"
+    },
+    {
+      "id": 60,
+      "date": "2025-12-01T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 890,
+      "createdAt": "2025-12-14T19:25:08.761Z",
+      "updatedAt": "2025-12-14T19:25:08.761Z"
+    },
+    {
+      "id": 61,
+      "date": "2025-12-02T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:25:30.773Z",
+      "updatedAt": "2025-12-14T19:25:30.773Z"
+    },
+    {
+      "id": 62,
+      "date": "2025-12-02T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1189,
+      "createdAt": "2025-12-14T19:25:30.773Z",
+      "updatedAt": "2025-12-14T19:25:30.773Z"
+    },
+    {
+      "id": 63,
+      "date": "2025-12-03T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 472,
+      "createdAt": "2025-12-14T19:25:43.278Z",
+      "updatedAt": "2025-12-14T19:25:43.278Z"
+    },
+    {
+      "id": 64,
+      "date": "2025-12-03T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 870,
+      "createdAt": "2025-12-14T19:25:43.278Z",
+      "updatedAt": "2025-12-14T19:25:43.278Z"
+    },
+    {
+      "id": 65,
+      "date": "2025-12-04T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 756,
+      "createdAt": "2025-12-14T19:25:55.376Z",
+      "updatedAt": "2025-12-14T19:25:55.376Z"
+    },
+    {
+      "id": 66,
+      "date": "2025-12-04T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1129,
+      "createdAt": "2025-12-14T19:25:55.376Z",
+      "updatedAt": "2025-12-14T19:25:55.376Z"
+    },
+    {
+      "id": 67,
+      "date": "2025-12-05T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 648,
+      "createdAt": "2025-12-14T19:26:05.992Z",
+      "updatedAt": "2025-12-14T19:26:05.992Z"
+    },
+    {
+      "id": 68,
+      "date": "2025-12-05T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1120,
+      "createdAt": "2025-12-14T19:26:05.992Z",
+      "updatedAt": "2025-12-14T19:26:05.992Z"
+    },
+    {
+      "id": 69,
+      "date": "2025-12-06T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 392,
+      "createdAt": "2025-12-14T19:26:18.347Z",
+      "updatedAt": "2025-12-14T19:26:18.347Z"
+    },
+    {
+      "id": 70,
+      "date": "2025-12-06T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1232,
+      "createdAt": "2025-12-14T19:26:18.347Z",
+      "updatedAt": "2025-12-14T19:26:18.347Z"
+    },
+    {
+      "id": 71,
+      "date": "2025-12-07T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 284,
+      "createdAt": "2025-12-14T19:26:28.558Z",
+      "updatedAt": "2025-12-14T19:26:28.558Z"
+    },
+    {
+      "id": 72,
+      "date": "2025-12-07T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1045,
+      "createdAt": "2025-12-14T19:26:28.558Z",
+      "updatedAt": "2025-12-14T19:26:28.558Z"
+    },
+    {
+      "id": 73,
+      "date": "2025-12-08T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 776,
+      "createdAt": "2025-12-14T19:26:39.694Z",
+      "updatedAt": "2025-12-14T19:26:39.694Z"
+    },
+    {
+      "id": 74,
+      "date": "2025-12-08T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1117,
+      "createdAt": "2025-12-14T19:26:39.694Z",
+      "updatedAt": "2025-12-14T19:26:39.694Z"
+    },
+    {
+      "id": 75,
+      "date": "2025-12-09T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 551,
+      "createdAt": "2025-12-14T19:26:48.758Z",
+      "updatedAt": "2025-12-14T19:26:48.758Z"
+    },
+    {
+      "id": 76,
+      "date": "2025-12-09T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1292,
+      "createdAt": "2025-12-14T19:26:48.758Z",
+      "updatedAt": "2025-12-14T19:26:48.758Z"
+    },
+    {
+      "id": 77,
+      "date": "2025-12-10T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 793,
+      "createdAt": "2025-12-14T19:26:58.293Z",
+      "updatedAt": "2025-12-14T19:26:58.293Z"
+    },
+    {
+      "id": 78,
+      "date": "2025-12-10T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 914,
+      "createdAt": "2025-12-14T19:26:58.293Z",
+      "updatedAt": "2025-12-14T19:26:58.293Z"
+    },
+    {
+      "id": 79,
+      "date": "2025-12-11T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 672,
+      "createdAt": "2025-12-14T19:27:29.324Z",
+      "updatedAt": "2025-12-14T19:27:29.324Z"
+    },
+    {
+      "id": 80,
+      "date": "2025-12-11T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 896,
+      "createdAt": "2025-12-14T19:27:29.324Z",
+      "updatedAt": "2025-12-14T19:27:29.324Z"
+    },
+    {
+      "id": 81,
+      "date": "2025-12-12T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 488,
+      "createdAt": "2025-12-14T19:27:43.414Z",
+      "updatedAt": "2025-12-14T19:27:43.414Z"
+    },
+    {
+      "id": 82,
+      "date": "2025-12-12T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 975,
+      "createdAt": "2025-12-14T19:27:43.414Z",
+      "updatedAt": "2025-12-14T19:27:43.414Z"
+    },
+    {
+      "id": 83,
+      "date": "2025-12-13T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 356,
+      "createdAt": "2025-12-14T19:28:02.840Z",
+      "updatedAt": "2025-12-15T08:29:18.705Z"
+    },
+    {
+      "id": 84,
+      "date": "2025-12-13T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1227,
+      "createdAt": "2025-12-14T19:28:02.840Z",
+      "updatedAt": "2025-12-15T08:29:18.705Z"
+    },
+    {
+      "id": 85,
+      "date": "2025-11-01T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 428,
+      "createdAt": "2025-12-14T19:36:17.104Z",
+      "updatedAt": "2025-12-14T19:36:17.104Z"
+    },
+    {
+      "id": 86,
+      "date": "2025-11-01T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 575,
+      "createdAt": "2025-12-14T19:36:17.104Z",
+      "updatedAt": "2025-12-14T19:36:17.104Z"
+    },
+    {
+      "id": 87,
+      "date": "2025-11-02T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 442,
+      "createdAt": "2025-12-14T19:36:48.751Z",
+      "updatedAt": "2025-12-14T19:36:48.751Z"
+    },
+    {
+      "id": 88,
+      "date": "2025-11-02T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 710,
+      "createdAt": "2025-12-14T19:36:48.751Z",
+      "updatedAt": "2025-12-14T19:36:48.751Z"
+    },
+    {
+      "id": 89,
+      "date": "2025-11-03T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 498,
+      "createdAt": "2025-12-14T19:37:40.855Z",
+      "updatedAt": "2025-12-14T19:37:40.855Z"
+    },
+    {
+      "id": 90,
+      "date": "2025-11-03T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 858,
+      "createdAt": "2025-12-14T19:37:40.855Z",
+      "updatedAt": "2025-12-14T19:37:40.855Z"
+    },
+    {
+      "id": 91,
+      "date": "2025-11-04T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 482,
+      "createdAt": "2025-12-14T19:38:40.424Z",
+      "updatedAt": "2025-12-14T19:38:40.424Z"
+    },
+    {
+      "id": 92,
+      "date": "2025-11-04T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 756,
+      "createdAt": "2025-12-14T19:38:40.424Z",
+      "updatedAt": "2025-12-14T19:38:40.424Z"
+    },
+    {
+      "id": 93,
+      "date": "2025-11-05T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 456,
+      "createdAt": "2025-12-14T19:39:07.438Z",
+      "updatedAt": "2025-12-14T19:39:07.438Z"
+    },
+    {
+      "id": 94,
+      "date": "2025-11-05T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 884,
+      "createdAt": "2025-12-14T19:39:07.438Z",
+      "updatedAt": "2025-12-14T19:39:07.438Z"
+    },
+    {
+      "id": 95,
+      "date": "2025-11-06T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 644,
+      "createdAt": "2025-12-14T19:40:09.070Z",
+      "updatedAt": "2025-12-14T19:40:09.070Z"
+    },
+    {
+      "id": 96,
+      "date": "2025-11-06T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1089,
+      "createdAt": "2025-12-14T19:40:09.070Z",
+      "updatedAt": "2025-12-14T19:40:09.070Z"
+    },
+    {
+      "id": 97,
+      "date": "2025-11-07T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 424,
+      "createdAt": "2025-12-14T19:40:27.049Z",
+      "updatedAt": "2025-12-14T19:40:27.049Z"
+    },
+    {
+      "id": 98,
+      "date": "2025-11-07T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 727,
+      "createdAt": "2025-12-14T19:40:27.049Z",
+      "updatedAt": "2025-12-14T19:40:27.049Z"
+    },
+    {
+      "id": 99,
+      "date": "2025-11-08T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 366,
+      "createdAt": "2025-12-14T19:41:14.653Z",
+      "updatedAt": "2025-12-14T19:41:14.653Z"
+    },
+    {
+      "id": 100,
+      "date": "2025-11-08T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 577,
+      "createdAt": "2025-12-14T19:41:14.653Z",
+      "updatedAt": "2025-12-14T19:41:14.653Z"
+    },
+    {
+      "id": 101,
+      "date": "2025-11-09T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 543,
+      "createdAt": "2025-12-14T19:41:40.390Z",
+      "updatedAt": "2025-12-14T19:41:40.390Z"
+    },
+    {
+      "id": 102,
+      "date": "2025-11-09T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 549,
+      "createdAt": "2025-12-14T19:41:40.390Z",
+      "updatedAt": "2025-12-14T19:41:40.390Z"
+    },
+    {
+      "id": 103,
+      "date": "2025-11-10T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 460,
+      "createdAt": "2025-12-14T19:42:12.747Z",
+      "updatedAt": "2025-12-14T19:42:12.747Z"
+    },
+    {
+      "id": 104,
+      "date": "2025-11-10T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 968,
+      "createdAt": "2025-12-14T19:42:12.747Z",
+      "updatedAt": "2025-12-14T19:42:12.747Z"
+    },
+    {
+      "id": 105,
+      "date": "2025-11-11T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 475,
+      "createdAt": "2025-12-14T19:43:02.351Z",
+      "updatedAt": "2025-12-14T19:43:02.351Z"
+    },
+    {
+      "id": 106,
+      "date": "2025-11-11T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1139,
+      "createdAt": "2025-12-14T19:43:02.351Z",
+      "updatedAt": "2025-12-14T19:43:02.351Z"
+    },
+    {
+      "id": 107,
+      "date": "2025-11-12T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 484,
+      "createdAt": "2025-12-14T19:43:32.419Z",
+      "updatedAt": "2025-12-14T19:43:32.419Z"
+    },
+    {
+      "id": 108,
+      "date": "2025-11-12T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 647,
+      "createdAt": "2025-12-14T19:43:32.419Z",
+      "updatedAt": "2025-12-14T19:43:32.419Z"
+    },
+    {
+      "id": 109,
+      "date": "2025-11-13T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 250,
+      "createdAt": "2025-12-14T19:44:16.351Z",
+      "updatedAt": "2025-12-14T19:44:16.351Z"
+    },
+    {
+      "id": 110,
+      "date": "2025-11-13T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 200,
+      "createdAt": "2025-12-14T19:44:16.351Z",
+      "updatedAt": "2025-12-14T19:44:16.351Z"
+    },
+    {
+      "id": 111,
+      "date": "2025-11-14T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:44:55.164Z",
+      "updatedAt": "2025-12-14T19:44:55.164Z"
+    },
+    {
+      "id": 112,
+      "date": "2025-11-14T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:44:55.164Z",
+      "updatedAt": "2025-12-14T19:44:55.164Z"
+    },
+    {
+      "id": 113,
+      "date": "2025-11-15T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:42.718Z",
+      "updatedAt": "2025-12-14T19:45:42.718Z"
+    },
+    {
+      "id": 114,
+      "date": "2025-11-15T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:42.718Z",
+      "updatedAt": "2025-12-14T19:45:42.718Z"
+    },
+    {
+      "id": 115,
+      "date": "2025-11-16T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:47.183Z",
+      "updatedAt": "2025-12-14T19:45:47.183Z"
+    },
+    {
+      "id": 116,
+      "date": "2025-11-16T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:47.183Z",
+      "updatedAt": "2025-12-14T19:45:47.183Z"
+    },
+    {
+      "id": 117,
+      "date": "2025-11-17T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:50.334Z",
+      "updatedAt": "2025-12-14T19:45:50.334Z"
+    },
+    {
+      "id": 118,
+      "date": "2025-11-17T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:50.334Z",
+      "updatedAt": "2025-12-14T19:45:50.334Z"
+    },
+    {
+      "id": 119,
+      "date": "2025-11-18T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:53.880Z",
+      "updatedAt": "2025-12-14T19:45:53.880Z"
+    },
+    {
+      "id": 120,
+      "date": "2025-11-18T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:45:53.880Z",
+      "updatedAt": "2025-12-14T19:45:53.880Z"
+    },
+    {
+      "id": 121,
+      "date": "2025-11-19T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 382,
+      "createdAt": "2025-12-14T19:46:07.826Z",
+      "updatedAt": "2025-12-14T19:46:07.826Z"
+    },
+    {
+      "id": 122,
+      "date": "2025-11-19T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 637,
+      "createdAt": "2025-12-14T19:46:07.826Z",
+      "updatedAt": "2025-12-14T19:46:07.826Z"
+    },
+    {
+      "id": 123,
+      "date": "2025-11-20T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 597,
+      "createdAt": "2025-12-14T19:49:51.899Z",
+      "updatedAt": "2025-12-14T19:49:51.899Z"
+    },
+    {
+      "id": 124,
+      "date": "2025-11-20T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1029,
+      "createdAt": "2025-12-14T19:49:51.899Z",
+      "updatedAt": "2025-12-14T19:49:51.899Z"
+    },
+    {
+      "id": 125,
+      "date": "2025-11-21T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 492,
+      "createdAt": "2025-12-14T19:50:51.693Z",
+      "updatedAt": "2025-12-14T19:50:51.693Z"
+    },
+    {
+      "id": 126,
+      "date": "2025-11-21T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 909,
+      "createdAt": "2025-12-14T19:50:51.693Z",
+      "updatedAt": "2025-12-14T19:50:51.693Z"
+    },
+    {
+      "id": 127,
+      "date": "2025-11-22T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 280,
+      "createdAt": "2025-12-14T19:51:17.536Z",
+      "updatedAt": "2025-12-14T19:51:17.536Z"
+    },
+    {
+      "id": 128,
+      "date": "2025-11-22T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 771,
+      "createdAt": "2025-12-14T19:51:17.536Z",
+      "updatedAt": "2025-12-14T19:51:17.536Z"
+    },
+    {
+      "id": 129,
+      "date": "2025-11-23T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 213,
+      "createdAt": "2025-12-14T19:51:40.691Z",
+      "updatedAt": "2025-12-14T19:52:31.255Z"
+    },
+    {
+      "id": 130,
+      "date": "2025-11-23T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 958,
+      "createdAt": "2025-12-14T19:51:40.691Z",
+      "updatedAt": "2025-12-14T19:52:31.255Z"
+    },
+    {
+      "id": 133,
+      "date": "2025-11-24T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 623,
+      "createdAt": "2025-12-14T19:53:06.993Z",
+      "updatedAt": "2025-12-14T19:53:06.993Z"
+    },
+    {
+      "id": 134,
+      "date": "2025-11-24T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 986,
+      "createdAt": "2025-12-14T19:53:06.993Z",
+      "updatedAt": "2025-12-14T19:53:06.993Z"
+    },
+    {
+      "id": 135,
+      "date": "2025-11-25T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 168,
+      "createdAt": "2025-12-14T19:53:39.195Z",
+      "updatedAt": "2025-12-14T19:53:39.195Z"
+    },
+    {
+      "id": 136,
+      "date": "2025-11-25T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 253,
+      "createdAt": "2025-12-14T19:53:39.195Z",
+      "updatedAt": "2025-12-14T19:53:39.195Z"
+    },
+    {
+      "id": 137,
+      "date": "2025-11-26T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:54:04.643Z",
+      "updatedAt": "2025-12-14T19:54:04.643Z"
+    },
+    {
+      "id": 138,
+      "date": "2025-11-26T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:54:04.643Z",
+      "updatedAt": "2025-12-14T19:54:04.643Z"
+    },
+    {
+      "id": 139,
+      "date": "2025-11-27T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:54:08.247Z",
+      "updatedAt": "2025-12-14T19:54:08.247Z"
+    },
+    {
+      "id": 140,
+      "date": "2025-11-27T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 0,
+      "createdAt": "2025-12-14T19:54:08.247Z",
+      "updatedAt": "2025-12-14T19:54:08.247Z"
+    },
+    {
+      "id": 141,
+      "date": "2025-11-28T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 214,
+      "createdAt": "2025-12-14T19:54:17.806Z",
+      "updatedAt": "2025-12-14T19:54:17.806Z"
+    },
+    {
+      "id": 142,
+      "date": "2025-11-28T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 302,
+      "createdAt": "2025-12-14T19:54:17.806Z",
+      "updatedAt": "2025-12-14T19:54:17.806Z"
+    },
+    {
+      "id": 143,
+      "date": "2025-11-29T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 456,
+      "createdAt": "2025-12-14T19:54:53.413Z",
+      "updatedAt": "2025-12-14T19:54:53.413Z"
+    },
+    {
+      "id": 144,
+      "date": "2025-11-29T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 327,
+      "createdAt": "2025-12-14T19:54:53.413Z",
+      "updatedAt": "2025-12-14T19:54:53.413Z"
+    },
+    {
+      "id": 145,
+      "date": "2025-11-30T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 400,
+      "createdAt": "2025-12-14T19:55:44.744Z",
+      "updatedAt": "2025-12-14T19:55:44.744Z"
+    },
+    {
+      "id": 146,
+      "date": "2025-11-30T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 390,
+      "createdAt": "2025-12-14T19:55:44.744Z",
+      "updatedAt": "2025-12-14T19:55:44.744Z"
+    },
+    {
+      "id": 151,
+      "date": "2025-12-14T00:00:00.000Z",
+      "platform": "Google",
+      "amount": 308,
+      "createdAt": "2025-12-15T11:28:50.973Z",
+      "updatedAt": "2025-12-15T11:28:50.973Z"
+    },
+    {
+      "id": 152,
+      "date": "2025-12-14T00:00:00.000Z",
+      "platform": "Microsoft",
+      "amount": 1246,
+      "createdAt": "2025-12-15T11:28:50.973Z",
+      "updatedAt": "2025-12-15T11:28:50.973Z"
+    }
+  ],
+  "conversions": [
+    {
+      "id": 3,
+      "date": "2025-07-16T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:42:38.604Z",
+      "updatedAt": "2025-12-14T18:42:38.604Z"
+    },
+    {
+      "id": 4,
+      "date": "2025-07-17T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 3,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:43:00.687Z",
+      "updatedAt": "2025-12-14T18:43:00.687Z"
+    },
+    {
+      "id": 5,
+      "date": "2025-07-18T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:43:25.068Z",
+      "updatedAt": "2025-12-14T18:43:25.068Z"
+    },
+    {
+      "id": 6,
+      "date": "2025-07-18T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:43:25.068Z",
+      "updatedAt": "2025-12-14T18:43:25.068Z"
+    },
+    {
+      "id": 7,
+      "date": "2025-07-20T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:44:06.533Z",
+      "updatedAt": "2025-12-14T18:44:06.533Z"
+    },
+    {
+      "id": 8,
+      "date": "2025-07-20T00:00:00.000Z",
+      "offerId": 4,
+      "leads": 4,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:44:06.533Z",
+      "updatedAt": "2025-12-14T18:44:06.533Z"
+    },
+    {
+      "id": 9,
+      "date": "2025-07-21T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:44:35.018Z",
+      "updatedAt": "2025-12-14T18:44:35.018Z"
+    },
+    {
+      "id": 10,
+      "date": "2025-07-23T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 5,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:45:21.816Z",
+      "updatedAt": "2025-12-14T18:45:21.816Z"
+    },
+    {
+      "id": 11,
+      "date": "2025-07-24T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:45:40.247Z",
+      "updatedAt": "2025-12-14T18:45:40.247Z"
+    },
+    {
+      "id": 12,
+      "date": "2025-07-25T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:46:08.236Z",
+      "updatedAt": "2025-12-14T18:46:08.236Z"
+    },
+    {
+      "id": 13,
+      "date": "2025-07-26T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:46:28.167Z",
+      "updatedAt": "2025-12-14T18:46:28.167Z"
+    },
+    {
+      "id": 14,
+      "date": "2025-07-27T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 4,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:46:46.331Z",
+      "updatedAt": "2025-12-14T18:46:46.331Z"
+    },
+    {
+      "id": 15,
+      "date": "2025-07-28T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 8,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:47:11.847Z",
+      "updatedAt": "2025-12-14T18:47:11.847Z"
+    },
+    {
+      "id": 16,
+      "date": "2025-07-30T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 3,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:47:53.997Z",
+      "updatedAt": "2025-12-14T18:47:53.997Z"
+    },
+    {
+      "id": 17,
+      "date": "2025-07-31T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 4,
+      "sales": 0,
+      "createdAt": "2025-12-14T18:54:07.548Z",
+      "updatedAt": "2025-12-14T18:54:07.548Z"
+    },
+    {
+      "id": 18,
+      "date": "2025-12-01T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:29:09.761Z",
+      "updatedAt": "2025-12-14T19:29:09.761Z"
+    },
+    {
+      "id": 19,
+      "date": "2025-12-01T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 43,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:29:09.761Z",
+      "updatedAt": "2025-12-14T19:29:09.761Z"
+    },
+    {
+      "id": 20,
+      "date": "2025-12-01T00:00:00.000Z",
+      "offerId": 5,
+      "leads": 0,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:29:09.761Z",
+      "updatedAt": "2025-12-14T19:29:09.761Z"
+    },
+    {
+      "id": 21,
+      "date": "2025-12-02T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:30:10.452Z",
+      "updatedAt": "2025-12-14T19:30:10.452Z"
+    },
+    {
+      "id": 22,
+      "date": "2025-12-02T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 39,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:30:10.452Z",
+      "updatedAt": "2025-12-14T19:30:10.452Z"
+    },
+    {
+      "id": 23,
+      "date": "2025-12-02T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:30:10.452Z",
+      "updatedAt": "2025-12-14T19:30:10.452Z"
+    },
+    {
+      "id": 24,
+      "date": "2025-12-02T00:00:00.000Z",
+      "offerId": 4,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:30:10.452Z",
+      "updatedAt": "2025-12-14T19:30:10.452Z"
+    },
+    {
+      "id": 25,
+      "date": "2025-12-02T00:00:00.000Z",
+      "offerId": 5,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:30:10.452Z",
+      "updatedAt": "2025-12-14T19:30:10.452Z"
+    },
+    {
+      "id": 26,
+      "date": "2025-12-03T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 29,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:30:48.682Z",
+      "updatedAt": "2025-12-14T19:30:48.682Z"
+    },
+    {
+      "id": 27,
+      "date": "2025-12-03T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:30:48.682Z",
+      "updatedAt": "2025-12-14T19:30:48.682Z"
+    },
+    {
+      "id": 28,
+      "date": "2025-12-03T00:00:00.000Z",
+      "offerId": 5,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:30:48.682Z",
+      "updatedAt": "2025-12-14T19:30:48.682Z"
+    },
+    {
+      "id": 29,
+      "date": "2025-12-04T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 3,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:31:13.823Z",
+      "updatedAt": "2025-12-14T19:31:13.823Z"
+    },
+    {
+      "id": 30,
+      "date": "2025-12-04T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 75,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:31:13.823Z",
+      "updatedAt": "2025-12-14T19:31:13.823Z"
+    },
+    {
+      "id": 31,
+      "date": "2025-12-04T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:31:13.823Z",
+      "updatedAt": "2025-12-14T19:31:13.823Z"
+    },
+    {
+      "id": 32,
+      "date": "2025-12-05T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 45,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:31:34.243Z",
+      "updatedAt": "2025-12-14T19:31:34.243Z"
+    },
+    {
+      "id": 33,
+      "date": "2025-12-05T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:31:34.243Z",
+      "updatedAt": "2025-12-14T19:31:34.243Z"
+    },
+    {
+      "id": 34,
+      "date": "2025-12-06T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:31:54.137Z",
+      "updatedAt": "2025-12-14T19:31:54.137Z"
+    },
+    {
+      "id": 35,
+      "date": "2025-12-06T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 35,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:31:54.137Z",
+      "updatedAt": "2025-12-14T19:31:54.137Z"
+    },
+    {
+      "id": 36,
+      "date": "2025-12-07T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:32:09.923Z",
+      "updatedAt": "2025-12-14T19:32:09.923Z"
+    },
+    {
+      "id": 37,
+      "date": "2025-12-07T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 60,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:32:09.923Z",
+      "updatedAt": "2025-12-14T19:32:09.923Z"
+    },
+    {
+      "id": 38,
+      "date": "2025-12-08T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 2,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:33:01.708Z",
+      "updatedAt": "2025-12-14T19:33:01.708Z"
+    },
+    {
+      "id": 39,
+      "date": "2025-12-08T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 79,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:33:01.708Z",
+      "updatedAt": "2025-12-14T19:33:01.708Z"
+    },
+    {
+      "id": 40,
+      "date": "2025-12-08T00:00:00.000Z",
+      "offerId": 4,
+      "leads": 0,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:33:01.708Z",
+      "updatedAt": "2025-12-14T19:33:01.708Z"
+    },
+    {
+      "id": 41,
+      "date": "2025-12-09T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 60,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:33:21.206Z",
+      "updatedAt": "2025-12-14T19:33:21.206Z"
+    },
+    {
+      "id": 42,
+      "date": "2025-12-10T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:33:49.687Z",
+      "updatedAt": "2025-12-14T19:33:49.687Z"
+    },
+    {
+      "id": 43,
+      "date": "2025-12-10T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 60,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:33:49.687Z",
+      "updatedAt": "2025-12-14T19:33:49.687Z"
+    },
+    {
+      "id": 44,
+      "date": "2025-12-10T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:33:49.687Z",
+      "updatedAt": "2025-12-14T19:33:49.687Z"
+    },
+    {
+      "id": 45,
+      "date": "2025-12-11T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:34:19.338Z",
+      "updatedAt": "2025-12-14T19:34:19.338Z"
+    },
+    {
+      "id": 46,
+      "date": "2025-12-11T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 33,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:34:19.338Z",
+      "updatedAt": "2025-12-14T19:34:19.338Z"
+    },
+    {
+      "id": 47,
+      "date": "2025-12-11T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 0,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:34:19.338Z",
+      "updatedAt": "2025-12-14T19:34:19.338Z"
+    },
+    {
+      "id": 48,
+      "date": "2025-12-12T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:34:44.391Z",
+      "updatedAt": "2025-12-14T19:34:44.391Z"
+    },
+    {
+      "id": 49,
+      "date": "2025-12-12T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 56,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:34:44.391Z",
+      "updatedAt": "2025-12-14T19:34:44.391Z"
+    },
+    {
+      "id": 50,
+      "date": "2025-12-12T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:34:44.391Z",
+      "updatedAt": "2025-12-14T19:34:44.391Z"
+    },
+    {
+      "id": 51,
+      "date": "2025-11-01T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:36:31.966Z",
+      "updatedAt": "2025-12-14T19:36:31.966Z"
+    },
+    {
+      "id": 52,
+      "date": "2025-11-01T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 38,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:36:31.966Z",
+      "updatedAt": "2025-12-14T19:36:31.966Z"
+    },
+    {
+      "id": 53,
+      "date": "2025-11-02T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:37:02.915Z",
+      "updatedAt": "2025-12-14T19:37:02.915Z"
+    },
+    {
+      "id": 54,
+      "date": "2025-11-02T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 65,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:37:02.915Z",
+      "updatedAt": "2025-12-14T19:37:02.915Z"
+    },
+    {
+      "id": 55,
+      "date": "2025-11-03T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:38:11.685Z",
+      "updatedAt": "2025-12-14T19:38:11.685Z"
+    },
+    {
+      "id": 56,
+      "date": "2025-11-03T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 51,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:38:11.685Z",
+      "updatedAt": "2025-12-14T19:38:11.685Z"
+    },
+    {
+      "id": 57,
+      "date": "2025-11-04T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 43,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:38:52.114Z",
+      "updatedAt": "2025-12-14T19:38:52.114Z"
+    },
+    {
+      "id": 58,
+      "date": "2025-11-05T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:39:24.504Z",
+      "updatedAt": "2025-12-14T19:39:24.504Z"
+    },
+    {
+      "id": 59,
+      "date": "2025-11-05T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 27,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:39:24.504Z",
+      "updatedAt": "2025-12-14T19:39:24.504Z"
+    },
+    {
+      "id": 60,
+      "date": "2025-11-05T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:39:24.504Z",
+      "updatedAt": "2025-12-14T19:39:24.504Z"
+    },
+    {
+      "id": 61,
+      "date": "2025-11-06T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:39:42.252Z",
+      "updatedAt": "2025-12-14T19:39:42.252Z"
+    },
+    {
+      "id": 62,
+      "date": "2025-11-06T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 45,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:39:42.252Z",
+      "updatedAt": "2025-12-14T19:39:42.252Z"
+    },
+    {
+      "id": 63,
+      "date": "2025-11-06T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:39:42.252Z",
+      "updatedAt": "2025-12-14T19:39:42.252Z"
+    },
+    {
+      "id": 64,
+      "date": "2025-11-07T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 46,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:40:42.602Z",
+      "updatedAt": "2025-12-14T19:40:42.602Z"
+    },
+    {
+      "id": 65,
+      "date": "2025-11-08T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:41:28.049Z",
+      "updatedAt": "2025-12-14T19:41:28.049Z"
+    },
+    {
+      "id": 66,
+      "date": "2025-11-08T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 37,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:41:28.049Z",
+      "updatedAt": "2025-12-14T19:41:28.049Z"
+    },
+    {
+      "id": 67,
+      "date": "2025-11-09T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:41:52.831Z",
+      "updatedAt": "2025-12-14T19:41:52.831Z"
+    },
+    {
+      "id": 68,
+      "date": "2025-11-09T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 34,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:41:52.831Z",
+      "updatedAt": "2025-12-14T19:41:52.831Z"
+    },
+    {
+      "id": 69,
+      "date": "2025-11-10T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:42:29.300Z",
+      "updatedAt": "2025-12-14T19:42:29.300Z"
+    },
+    {
+      "id": 70,
+      "date": "2025-11-10T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 63,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:42:29.300Z",
+      "updatedAt": "2025-12-14T19:42:29.300Z"
+    },
+    {
+      "id": 71,
+      "date": "2025-11-11T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:43:18.834Z",
+      "updatedAt": "2025-12-14T19:43:18.834Z"
+    },
+    {
+      "id": 72,
+      "date": "2025-11-11T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 74,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:43:18.834Z",
+      "updatedAt": "2025-12-14T19:43:18.834Z"
+    },
+    {
+      "id": 73,
+      "date": "2025-11-12T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:43:59.116Z",
+      "updatedAt": "2025-12-14T19:43:59.116Z"
+    },
+    {
+      "id": 74,
+      "date": "2025-11-12T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 41,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:43:59.116Z",
+      "updatedAt": "2025-12-14T19:43:59.116Z"
+    },
+    {
+      "id": 75,
+      "date": "2025-11-12T00:00:00.000Z",
+      "offerId": 5,
+      "leads": 0,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:43:59.116Z",
+      "updatedAt": "2025-12-14T19:43:59.116Z"
+    },
+    {
+      "id": 76,
+      "date": "2025-11-13T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:44:42.898Z",
+      "updatedAt": "2025-12-14T19:44:42.898Z"
+    },
+    {
+      "id": 77,
+      "date": "2025-11-13T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 26,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:44:42.898Z",
+      "updatedAt": "2025-12-14T19:44:42.898Z"
+    },
+    {
+      "id": 78,
+      "date": "2025-11-13T00:00:00.000Z",
+      "offerId": 4,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:44:42.898Z",
+      "updatedAt": "2025-12-14T19:44:42.898Z"
+    },
+    {
+      "id": 79,
+      "date": "2025-11-14T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:45:12.199Z",
+      "updatedAt": "2025-12-14T19:45:12.199Z"
+    },
+    {
+      "id": 80,
+      "date": "2025-11-19T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 0,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:46:24.013Z",
+      "updatedAt": "2025-12-14T19:46:24.013Z"
+    },
+    {
+      "id": 81,
+      "date": "2025-11-19T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 25,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:46:24.013Z",
+      "updatedAt": "2025-12-14T19:46:24.013Z"
+    },
+    {
+      "id": 82,
+      "date": "2025-11-20T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:50:17.011Z",
+      "updatedAt": "2025-12-14T19:50:17.011Z"
+    },
+    {
+      "id": 83,
+      "date": "2025-11-20T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 60,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:50:17.011Z",
+      "updatedAt": "2025-12-14T19:50:17.011Z"
+    },
+    {
+      "id": 84,
+      "date": "2025-11-20T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:50:17.011Z",
+      "updatedAt": "2025-12-14T19:50:17.011Z"
+    },
+    {
+      "id": 85,
+      "date": "2025-11-21T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 30,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:50:59.564Z",
+      "updatedAt": "2025-12-14T19:50:59.564Z"
+    },
+    {
+      "id": 86,
+      "date": "2025-11-22T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 56,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:51:24.024Z",
+      "updatedAt": "2025-12-14T19:51:24.024Z"
+    },
+    {
+      "id": 87,
+      "date": "2025-11-23T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 1,
+      "createdAt": "2025-12-14T19:52:52.141Z",
+      "updatedAt": "2025-12-14T19:52:52.141Z"
+    },
+    {
+      "id": 88,
+      "date": "2025-11-23T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 55,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:52:52.141Z",
+      "updatedAt": "2025-12-14T19:52:52.141Z"
+    },
+    {
+      "id": 89,
+      "date": "2025-11-24T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 53,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:53:24.875Z",
+      "updatedAt": "2025-12-14T19:53:24.875Z"
+    },
+    {
+      "id": 90,
+      "date": "2025-11-24T00:00:00.000Z",
+      "offerId": 2,
+      "leads": 2,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:53:24.875Z",
+      "updatedAt": "2025-12-14T19:53:24.875Z"
+    },
+    {
+      "id": 91,
+      "date": "2025-11-25T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 21,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:53:51.423Z",
+      "updatedAt": "2025-12-14T19:53:51.423Z"
+    },
+    {
+      "id": 92,
+      "date": "2025-11-28T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:54:33.158Z",
+      "updatedAt": "2025-12-14T19:54:33.158Z"
+    },
+    {
+      "id": 93,
+      "date": "2025-11-28T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 14,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:54:33.158Z",
+      "updatedAt": "2025-12-14T19:54:33.158Z"
+    },
+    {
+      "id": 94,
+      "date": "2025-11-29T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:55:23.091Z",
+      "updatedAt": "2025-12-14T19:55:23.091Z"
+    },
+    {
+      "id": 95,
+      "date": "2025-11-29T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 24,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:55:23.091Z",
+      "updatedAt": "2025-12-14T19:55:23.091Z"
+    },
+    {
+      "id": 96,
+      "date": "2025-11-30T00:00:00.000Z",
+      "offerId": 3,
+      "leads": 1,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:55:32.896Z",
+      "updatedAt": "2025-12-14T19:55:32.896Z"
+    },
+    {
+      "id": 97,
+      "date": "2025-11-30T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 14,
+      "sales": 0,
+      "createdAt": "2025-12-14T19:55:32.896Z",
+      "updatedAt": "2025-12-14T19:55:32.896Z"
+    },
+    {
+      "id": 98,
+      "date": "2025-12-13T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 76,
+      "sales": 0,
+      "createdAt": "2025-12-15T08:29:48.049Z",
+      "updatedAt": "2025-12-15T08:29:48.049Z"
+    },
+    {
+      "id": 99,
+      "date": "2025-12-14T00:00:00.000Z",
+      "offerId": 1,
+      "leads": 59,
+      "sales": 0,
+      "createdAt": "2025-12-15T11:29:18.471Z",
+      "updatedAt": "2025-12-15T11:29:18.471Z"
+    }
+  ]
+}
