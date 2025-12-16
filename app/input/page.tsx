@@ -41,8 +41,8 @@ const handleSave = async () => {
     } else {
       const conversionsList = offers.map(offer => ({
         offerId: offer.id,
-        leads: convData[offer.id]?.leads || 0,
-        sales: convData[offer.id]?.sales || 0,
+        leads: Number(convData[offer.id]?.leads || 0),
+        sales: Number(convData[offer.id]?.sales || 0),
       })).filter(c => c.leads > 0 || c.sales > 0);
 
       payload = {
