@@ -6,8 +6,10 @@ import { signOut } from 'next-auth/react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 // Zorg dat je nl locale importeert als je Nederlandse namen wilt
-import { registerLocale } from  "react-datepicker";
-import nl from 'date-fns/locale/nl';
+import { registerLocale } from "react-datepicker";
+// VERVANG DE OUDE REGEL HIERMEE:
+import { nl } from 'date-fns/locale'; 
+
 registerLocale('nl', nl);
 import {
   ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
