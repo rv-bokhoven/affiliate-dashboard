@@ -15,29 +15,34 @@ const formatPrice = (amount: number) => {
   }).format(amount);
 };
 
-interface OfferDetail {
-  offer: {
-    id: number;
-    name: string;
-    network: string;
-    payoutLead: number;
-    payoutSale: number;
-  };
-  chartData: {
-    date: string;
+// 1. De Filter opties (die hadden we net gefixt)
+type FilterRange = 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'this_year' | 'all' | 'custom';
+
+// 2. Definieer hoe het 'Offer' eruit ziet
+interface Offer {
+  id: number;
+  name: string;
+  payoutLead: number;
+  payoutSale: number;
+  // Voeg hier eventueel andere velden toe als TS daarom zeurt (bijv. capLeads)
+}
+
+// 3. Definieer hoe de HELE API response eruit ziet (DEZE miste je!)
+interface ApiData {
+  offer: Offer;
+  chartData: any[]; // We houden dit even simpel op any[]
+  totals: {
     leads: number;
     sales: number;
     revenue: number;
-  }[];
+  };
 }
-
-type FilterRange = 'this_week' | 'last_week' | 'this_month' | 'this_year' | 'last_month' | 'custom' | 'all';
 
 export default function OfferDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const offerId = resolvedParams.id;
 
-  const [data, setData] = useState<OfferDetail | null>(null);
+  const [data, setData] = useState<ApiData | null>(null);
   const [loading, setLoading] = useState(true);
   
   // Nieuwe Filter State
