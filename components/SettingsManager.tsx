@@ -53,10 +53,10 @@ export default function SettingsManager({ campaign }: SettingsManagerProps) {
     } catch (e) { toast.error('Opslaan mislukt'); } finally { setLoading(false); }
   };
 
-  const handleAddMember = async () => {
-    // Validatie: Email én Wachtwoord zijn nu verplicht
-    if (!newEmail || !newPassword) {
-        toast.error('Vul een email en een wachtwoord in');
+const handleAddMember = async () => {
+    // AANGEPAST: Alleen Email is verplicht om de request te starten
+    if (!newEmail) {
+        toast.error('Vul een emailadres in');
         return;
     }
 
@@ -68,7 +68,7 @@ export default function SettingsManager({ campaign }: SettingsManagerProps) {
           campaignId: campaign.id,
           data: { 
               email: newEmail, 
-              password: newPassword, // <--- We sturen het wachtwoord mee
+              password: newPassword, // Mag nu leeg zijn
               role: 'MEMBER' 
           }
         })
@@ -82,9 +82,10 @@ export default function SettingsManager({ campaign }: SettingsManagerProps) {
         setNewEmail('');
         setNewPassword('');
         
-        toast.success('Gebruiker aangemaakt en toegevoegd!');
+        toast.success(newPassword ? 'Nieuwe gebruiker aangemaakt & toegevoegd' : 'Bestaande gebruiker toegevoegd');
       } else {
         const errorData = await res.json();
+        // Toon de specifieke foutmelding van de server (bijv: "Wachtwoord verplicht")
         toast.error(errorData.error || 'Kon lid niet toevoegen');
       }
     } catch (e) { toast.error('Error'); }
@@ -201,8 +202,9 @@ export default function SettingsManager({ campaign }: SettingsManagerProps) {
                          <label className="text-xs font-medium text-neutral-500 uppercase mb-1.5 block">Wachtwoord</label>
                          <div className="flex gap-2">
                             <input 
-                                type="text" // Type text zodat je ziet wat je aanmaakt
-                                placeholder="Wachtwoord123" 
+                                type="text" 
+                                // AANGEPAST: Placeholder verduidelijkt de werking
+                                placeholder="Alleen voor nieuwe users" 
                                 className={inputClass} 
                                 value={newPassword}
                                 onChange={e => setNewPassword(e.target.value)}
@@ -211,6 +213,8 @@ export default function SettingsManager({ campaign }: SettingsManagerProps) {
                                 <UserPlus size={16} /> Toevoegen
                             </button>
                         </div>
+                        {/* AANGEPAST: Hulptekstje eronder */}
+                        <p className="text-[10px] text-neutral-600 mt-1">Laat leeg als de gebruiker al bestaat.</p>
                     </div>
                 </div>
 
