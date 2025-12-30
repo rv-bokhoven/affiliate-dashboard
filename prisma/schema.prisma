@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,49 +9,165 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-// Model voor je dagelijkse kosten (Google/Microsoft)
-model DailySpend {
-  id        Int      @id @default(autoincrement())
-  date      DateTime
-  platform  String   // Bijv. "Google" of "Microsoft"
-  amount    Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// --------------------------------------
+// NIEUWE MODELLEN
+// --------------------------------------
 
-  // Zorgt dat je niet 2x kosten voor Google op dezelfde dag kunt hebben
-  @@unique([date, platform], name: "date_platform")
+// Je partners (AdCombo, ClickDealer, etc.)
+model AffiliateNetwork {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique 
+  
+  offers        Offer[]
+  adjustments   RevenueAdjustment[] 
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
-// Model voor je Offers
-model Offer {
+// Campagnes / Projecten
+model Campaign {
   id          Int          @id @default(autoincrement())
   name        String
-  network     String?
-  payoutLead  Float        @default(0)
-  payoutSale  Float        @default(0)
+  
+  // AANGEPAST: String met quotes om de default waarde
+  type        String       @default("PAID") 
+  currency    String       @default("USD")
+  logo        String?  @default("") // URL naar het logo 
 
-  // NIEUW: De Caps (Optioneel)
-  capLeads    Int?         
-  capRevenue  Float?
+  offers      Offer[]
+  dailySpends DailySpend[]
+  adjustments RevenueAdjustment[]
+  logs        DailyLog[]
+  members     CampaignMember[]
 
-  conversions Conversion[] // Relatie naar conversies
+
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
 
-// Model voor je Conversies (Leads/Sales per dag per offer)
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // Hashed wachtwoord
+  name      String?
+  role      String   @default("USER") // "SUPER_ADMIN" of "USER"
+  
+  memberships CampaignMember[]
+}
+
+// Handmatige inkomsten (Bonussen, RevShare correcties, SEO maandbedragen)
+model RevenueAdjustment {
+  id            Int      @id @default(autoincrement())
+  date          DateTime
+  amount        Float
+  currency      String   @default("USD")
+  description   String?  
+  
+  networkId     Int
+  network       AffiliateNetwork @relation(fields: [networkId], references: [id])
+  
+  campaignId    Int?
+  campaign      Campaign? @relation(fields: [campaignId], references: [id])
+
+  offerId       Int?
+  offer         Offer?    @relation(fields: [offerId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// --------------------------------------
+// AANGEPASTE BESTAANDE MODELLEN
+// --------------------------------------
+
+model DailySpend {
+  id           Int      @id @default(autoincrement())
+  date         DateTime
+  platform     String   
+  
+  amount       Float    
+  currency     String   @default("EUR") 
+  
+  exchangeRate Float    @default(1.0) 
+
+  campaignId   Int?
+  campaign     Campaign? @relation(fields: [campaignId], references: [id])
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([date, platform, campaignId], name: "date_platform_campaign")
+}
+
+model Offer {
+  id            Int          @id @default(autoincrement())
+  name          String
+
+  // MIGRATIE: Oude kolom behouden
+  networkLegacy String?      @map("network")
+
+  // Nieuwe koppeling
+  networkId     Int?
+  network       AffiliateNetwork? @relation(fields: [networkId], references: [id])
+  
+  // AANGEPAST: String met quotes om de default waarde
+  status        String       @default("ACTIVE") 
+  
+  payoutLead    Float        @default(0)
+  payoutSale    Float        @default(0)
+
+  capLeads      Int?
+  capRevenue    Float?
+
+  campaignId    Int?
+  campaign      Campaign? @relation(fields: [campaignId], references: [id])
+
+  conversions   Conversion[]
+  
+  adjustments   RevenueAdjustment[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
 model Conversion {
   id        Int      @id @default(autoincrement())
   date      DateTime
+  
   offerId   Int
+  offer     Offer    @relation(fields: [offerId], references: [id])
+  
   leads     Int      @default(0)
   sales     Int      @default(0)
   
-  offer     Offer    @relation(fields: [offerId], references: [id])
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Zorgt dat je niet 2x data voor dezelfde offer op dezelfde dag hebt
   @@unique([date, offerId], name: "date_offerId")
+}
+
+model DailyLog {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  type        String   // Bijv: 'spend' of 'conversions'
+  data        String     // Hier slaan we de flexibele data in op (Google spend, list of leads, etc.)
+  
+  campaignId  Int
+  campaign    Campaign @relation(fields: [campaignId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+// NIEUW MODEL
+model CampaignMember {
+  id          Int      @id @default(autoincrement())
+  role        String   @default("MEMBER") // ADMIN of VIEWER binnen het project
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  campaignId  Int
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, campaignId]) // Voorkomt dubbele toevoegingen
 }

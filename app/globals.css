@@ -59,3 +59,24 @@ body {
 .react-datepicker__triangle {
   display: none !important;
 }
+
+@layer utilities {
+  /* Minimalistische Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;     /* Heel smal */
+    height: 6px;    /* Voor horizontale scroll */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent; /* Achtergrond onzichtbaar */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #262626; /* neutral-800 (donkergrijs) */
+    border-radius: 9999px; /* Rond */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #404040; /* Iets lichter bij hover */
+  }
+}

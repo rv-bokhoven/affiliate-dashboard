@@ -1,36 +1,30 @@
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/db';
-import OffersManager from '@/components/OffersManager';
+import FinanceManager from '@/components/FinanceManager';
 
-export default async function OffersPage() {
-  // 1. Lees context (Cookie)
+export default async function FinancePage() {
   const cookieStore = await cookies();
   const activeCampaignId = cookieStore.get('activeCampaignId')?.value || '1';
   const campaignId = parseInt(activeCampaignId);
 
-  // 2. Haal Campagne Info
+  // Campagne Info
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
     select: { name: true }
   });
 
-  // 3. Haal Offers voor DEZE campagne
+  // Haal OFFERS op voor deze campagne (ipv Netwerken)
+  // We willen ze alfabetisch zien
   const offers = await prisma.offer.findMany({
     where: { campaignId: campaignId },
     include: { network: true },
-    orderBy: { id: 'desc' }
-  });
-
-  // 4. Haal Netwerken op (voor de dropdown in het add formulier)
-  const networks = await prisma.affiliateNetwork.findMany({
     orderBy: { name: 'asc' }
   });
 
   return (
-    <main className="flex flex-col items-center">
-      <OffersManager 
-        initialOffers={offers} 
-        networks={networks}
+    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center">
+      <FinanceManager 
+        offers={offers}
         campaignId={campaignId}
         campaignName={campaign?.name || 'Unknown'}
       />

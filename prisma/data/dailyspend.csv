@@ -1,0 +1,307 @@
+date,platforn,amount
+2025-11-01,Google ,428
+2025-11-02,Google ,442
+2025-11-03,Google ,498
+2025-11-04,Google ,482
+2025-11-05,Google ,456
+2025-11-06,Google ,644
+2025-11-07,Google ,424
+2025-11-08,Google ,366
+2025-11-09,Google ,543
+2025-11-10,Google ,460
+2025-11-11,Google ,475
+2025-11-12,Google ,484
+2025-11-13,Google ,250
+2025-11-14,Google ,0
+2025-11-15,Google ,0
+2025-11-16,Google ,0
+2025-11-17,Google ,0
+2025-11-18,Google ,0
+2025-11-19,Google ,382
+2025-11-20,Google ,597
+2025-11-21,Google ,492
+2025-11-22,Google ,280
+2025-11-23,Google ,213
+2025-11-24,Google ,623
+2025-11-25,Google ,168
+2025-11-26,Google ,0
+2025-11-27,Google ,0
+2025-11-28,Google ,214
+2025-11-29,Google ,456
+2025-11-30,Google ,400
+2025-11-01,Microsoft,575
+2025-11-02,Microsoft,710
+2025-11-03,Microsoft,858
+2025-11-04,Microsoft,756
+2025-11-05,Microsoft,884
+2025-11-06,Microsoft,1089
+2025-11-07,Microsoft,727
+2025-11-08,Microsoft,577
+2025-11-09,Microsoft,549
+2025-11-10,Microsoft,968
+2025-11-11,Microsoft,1139
+2025-11-12,Microsoft,647
+2025-11-13,Microsoft,200
+2025-11-14,Microsoft,0
+2025-11-15,Microsoft,0
+2025-11-16,Microsoft,0
+2025-11-17,Microsoft,0
+2025-11-18,Microsoft,0
+2025-11-19,Microsoft,637
+2025-11-20,Microsoft,1029
+2025-11-21,Microsoft,909
+2025-11-22,Microsoft,771
+2025-11-23,Microsoft,958
+2025-11-24,Microsoft,986
+2025-11-25,Microsoft,253
+2025-11-26,Microsoft,0
+2025-11-27,Microsoft,0
+2025-11-28,Microsoft,302
+2025-11-29,Microsoft,327
+2025-11-30,Microsoft,390
+2025-10-01,Google,353
+2025-10-02,Google,333
+2025-10-03,Google,291
+2025-10-04,Google,162
+2025-10-05,Google,97
+2025-10-06,Google,367
+2025-10-07,Google,397
+2025-10-08,Google,581
+2025-10-09,Google,254
+2025-10-10,Google,493
+2025-10-11,Google,237
+2025-10-12,Google,456
+2025-10-13,Google,120
+2025-10-14,Google,414
+2025-10-15,Google,529
+2025-10-16,Google,0
+2025-10-17,Google,0
+2025-10-18,Google,0
+2025-10-19,Google,0
+2025-10-20,Google,0
+2025-10-21,Google,0
+2025-10-22,Google,0
+2025-10-23,Google,0
+2025-10-24,Google,487
+2025-10-25,Google,189
+2025-10-26,Google,407
+2025-10-27,Google,513
+2025-10-28,Google,457
+2025-10-29,Google,445
+2025-10-30,Google,468
+2025-10-31,Google,471
+2025-10-01,Microsoft,292
+2025-10-02,Microsoft,189
+2025-10-03,Microsoft,243
+2025-10-04,Microsoft,533
+2025-10-05,Microsoft,456
+2025-10-06,Microsoft,566
+2025-10-07,Microsoft,616
+2025-10-08,Microsoft,768
+2025-10-09,Microsoft,623
+2025-10-10,Microsoft,407
+2025-10-11,Microsoft,237
+2025-10-12,Microsoft,170
+2025-10-13,Microsoft,311
+2025-10-14,Microsoft,787
+2025-10-15,Microsoft,725
+2025-10-16,Microsoft,220
+2025-10-17,Microsoft,0
+2025-10-18,Microsoft,0
+2025-10-19,Microsoft,0
+2025-10-20,Microsoft,0
+2025-10-21,Microsoft,0
+2025-10-22,Microsoft,0
+2025-10-23,Microsoft,0
+2025-10-24,Microsoft,371
+2025-10-25,Microsoft,700
+2025-10-26,Microsoft,444
+2025-10-27,Microsoft,649
+2025-10-28,Microsoft,658
+2025-10-29,Microsoft,663
+2025-10-30,Microsoft,900
+2025-10-31,Microsoft,843
+2025-09-01,Google,58
+2025-09-02,Google,0
+2025-09-03,Google,47
+2025-09-04,Google,160
+2025-09-05,Google,73
+2025-09-06,Google,0
+2025-09-07,Google,52
+2025-09-08,Google,0
+2025-09-09,Google,45
+2025-09-10,Google,63
+2025-09-11,Google,70
+2025-09-12,Google,50
+2025-09-13,Google,56
+2025-09-14,Google,53
+2025-09-15,Google,134
+2025-09-16,Google,140
+2025-09-17,Google,138
+2025-09-18,Google,47
+2025-09-19,Google,23
+2025-09-20,Google,52
+2025-09-21,Google,209
+2025-09-22,Google,350
+2025-09-23,Google,332
+2025-09-24,Google,193
+2025-09-25,Google,156
+2025-09-26,Google,127
+2025-09-27,Google,116
+2025-09-28,Google,124
+2025-09-29,Google,78
+2025-09-30,Google,350
+2025-09-01,Microsoft,60
+2025-09-02,Microsoft,215
+2025-09-03,Microsoft,302
+2025-09-04,Microsoft,255
+2025-09-05,Microsoft,303
+2025-09-06,Microsoft,243
+2025-09-07,Microsoft,298
+2025-09-08,Microsoft,489
+2025-09-09,Microsoft,362
+2025-09-10,Microsoft,363
+2025-09-11,Microsoft,328
+2025-09-12,Microsoft,306
+2025-09-13,Microsoft,146
+2025-09-14,Microsoft,399
+2025-09-15,Microsoft,173
+2025-09-16,Microsoft,618
+2025-09-17,Microsoft,577
+2025-09-18,Microsoft,182
+2025-09-19,Microsoft,281
+2025-09-20,Microsoft,449
+2025-09-21,Microsoft,415
+2025-09-22,Microsoft,715
+2025-09-23,Microsoft,839
+2025-09-24,Microsoft,548
+2025-09-25,Microsoft,381
+2025-09-26,Microsoft,384
+2025-09-27,Microsoft,286
+2025-09-28,Microsoft,275
+2025-09-29,Microsoft,621
+2025-09-30,Microsoft,244
+2025-08-01,Google,345
+2025-08-02,Google,345
+2025-08-03,Google,360
+2025-08-04,Google,399
+2025-08-05,Google,369
+2025-08-06,Google,337
+2025-08-07,Google,328
+2025-08-08,Google,405
+2025-08-09,Google,433
+2025-08-10,Google,235
+2025-08-11,Google,249
+2025-08-12,Google,280
+2025-08-13,Google,387
+2025-08-14,Google,194
+2025-08-15,Google,121
+2025-08-16,Google,177
+2025-08-17,Google,326
+2025-08-18,Google,236
+2025-08-19,Google,145
+2025-08-20,Google,274
+2025-08-21,Google,137
+2025-08-22,Google,152
+2025-08-23,Google,154
+2025-08-24,Google,165
+2025-08-25,Google,202
+2025-08-26,Google,183
+2025-08-27,Google,174
+2025-08-28,Google,143
+2025-08-29,Google,88
+2025-08-30,Google,80
+2025-08-31,Google,77
+2025-08-01,Microsoft,16
+2025-08-02,Microsoft,122
+2025-08-03,Microsoft,122
+2025-08-04,Microsoft,126
+2025-08-05,Microsoft,123
+2025-08-06,Microsoft,123
+2025-08-07,Microsoft,125
+2025-08-08,Microsoft,121
+2025-08-09,Microsoft,122
+2025-08-10,Microsoft,121
+2025-08-11,Microsoft,117
+2025-08-12,Microsoft,121
+2025-08-13,Microsoft,121
+2025-08-14,Microsoft,121
+2025-08-15,Microsoft,122
+2025-08-16,Microsoft,122
+2025-08-17,Microsoft,117
+2025-08-18,Microsoft,116
+2025-08-19,Microsoft,131
+2025-08-20,Microsoft,0
+2025-08-21,Microsoft,2
+2025-08-22,Microsoft,0
+2025-08-23,Microsoft,0
+2025-08-24,Microsoft,55
+2025-08-25,Microsoft,61
+2025-08-26,Microsoft,60
+2025-08-27,Microsoft,68
+2025-08-28,Microsoft,60
+2025-08-29,Microsoft,61
+2025-08-30,Microsoft,61
+2025-08-31,Microsoft,61
+2025-07-01,Google,0
+2025-07-02,Google,0
+2025-07-03,Google,14
+2025-07-04,Google,123
+2025-07-05,Google,122
+2025-07-06,Google,318
+2025-07-07,Google,103
+2025-07-08,Google,355
+2025-07-09,Google,366
+2025-07-10,Google,371
+2025-07-11,Google,356
+2025-07-12,Google,419
+2025-07-13,Google,255
+2025-07-14,Google,427
+2025-07-15,Google,401
+2025-07-16,Google,378
+2025-07-17,Google,305
+2025-07-18,Google,425
+2025-07-19,Google,176
+2025-07-20,Google,242
+2025-07-21,Google,332
+2025-07-22,Google,235
+2025-07-23,Google,491
+2025-07-24,Google,353
+2025-07-25,Google,433
+2025-07-26,Google,284
+2025-07-27,Google,260
+2025-07-28,Google,440
+2025-07-29,Google,171
+2025-07-30,Google,424
+2025-07-31,Google,331
+2025-07-01,Microsoft,0
+2025-07-02,Microsoft,0
+2025-07-03,Microsoft,0
+2025-07-04,Microsoft,0
+2025-07-05,Microsoft,0
+2025-07-06,Microsoft,0
+2025-07-07,Microsoft,0
+2025-07-08,Microsoft,0
+2025-07-09,Microsoft,0
+2025-07-10,Microsoft,0
+2025-07-11,Microsoft,0
+2025-07-12,Microsoft,0
+2025-07-13,Microsoft,0
+2025-07-14,Microsoft,0
+2025-07-15,Microsoft,0
+2025-07-16,Microsoft,0
+2025-07-17,Microsoft,0
+2025-07-18,Microsoft,0
+2025-07-19,Microsoft,0
+2025-07-20,Microsoft,0
+2025-07-21,Microsoft,121
+2025-07-22,Microsoft,118
+2025-07-23,Microsoft,122
+2025-07-24,Microsoft,118
+2025-07-25,Microsoft,121
+2025-07-26,Microsoft,47
+2025-07-27,Microsoft,32
+2025-07-28,Microsoft,15
+2025-07-29,Microsoft,13
+2025-07-30,Microsoft,15
+2025-07-31,Microsoft,0

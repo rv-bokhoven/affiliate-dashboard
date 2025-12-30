@@ -1,23 +1,26 @@
-import { withAuth } from "next-auth/middleware";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verifyToken } from '@/lib/auth';
 
-// In plaats van het direct te exporteren, roepen we de functie aan
-export default withAuth({
-  callbacks: {
-    // Deze functie bepaalt of iemand door mag. 
-    // !!token betekent: "Is er een token? Ja? Dan is het true (ingelogd)."
-    authorized: ({ token }) => !!token,
-  },
-});
+export async function middleware(request: NextRequest) {
+  const token = request.cookies.get('session_token')?.value;
+  
+  // 1. Check of sessie geldig is
+  const verifiedToken = token && (await verifyToken(token));
+
+  // 2. Als niet ingelogd en NIET op login pagina -> Redirect naar login
+  if (!verifiedToken && !request.nextUrl.pathname.startsWith('/login')) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // 3. Als WEL ingelogd en op login pagina -> Redirect naar dashboard
+  if (verifiedToken && request.nextUrl.pathname.startsWith('/login')) {
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: [
-    // Beveilig de homepagina
-    "/",
-    // Beveilig alles onder /offers
-    "/offers/:path*",
-    // Beveilig de input pagina
-    "/input/:path*",
-    // Beveilig de statistieken API
-    "/api/stats/:path*" 
-  ]
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
