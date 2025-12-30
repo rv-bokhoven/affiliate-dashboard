@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import PageContainer from '@/components/PageContainer';
-import OfferClient from './OfferClient'; // We maken zo ook even deze client component check
+import OfferClient from './OfferClient'; 
 import { 
   startOfMonth, endOfMonth, endOfDay as dateFnsEndOfDay, format, startOfWeek 
 } from 'date-fns';
@@ -19,7 +19,7 @@ export default async function OfferPage({
   params: Promise<{ id: string }>,
   searchParams: Promise<{ [key: string]: string | undefined }> 
 }) {
-  const { id } = await params; // Await params (Next.js 15+ best practice)
+  const { id } = await params; 
   const offerId = parseInt(id);
   const session: any = await getSession();
 
@@ -27,35 +27,39 @@ export default async function OfferPage({
   if (isNaN(offerId)) return notFound();
 
   // 1. HAAL OFFER OP + CAMPAGNE + MEMBERS
-  // We halen hem op puur op ID. Daarna checken we pas de rechten.
   const offer = await prisma.offer.findUnique({
     where: { id: offerId },
     include: {
       network: true,
       campaign: {
         include: {
-          members: true // Nodig voor permissie check
+          members: true 
         }
       },
-      conversions: true // We filteren de datum later in JS of via een aparte query als het traag wordt
+      conversions: true 
     }
   });
 
-  if (!offer) {
+  // --- HIER ZIT DE FIX ---
+  // We checken nu ook: !offer.campaign
+  // Als een offer geen campagne heeft, tonen we 'Niet gevonden'.
+  // Hierdoor weet TypeScript hierna dat offer.campaign NIET null is.
+  if (!offer || !offer.campaign) {
     return (
-      <PageContainer title="Niet gevonden" subtitle="Offer bestaat niet">
-        <div className="p-10 text-neutral-400">Offer met ID {offerId} niet gevonden.</div>
+      <PageContainer title="Niet gevonden" subtitle="Offer of Campagne bestaat niet">
+        <div className="p-10 text-neutral-400">
+            Offer met ID {offerId} niet gevonden of is niet gekoppeld aan een project.
+        </div>
       </PageContainer>
     );
   }
 
   // 2. SECURITY CHECK
-  // Heeft de ingelogde user toegang tot de campagne van dit offer?
   let hasAccess = false;
   if (session.role === 'SUPER_ADMIN') {
     hasAccess = true;
   } else {
-    // Check of userId in de members lijst staat van deze campagne
+    // TypeScript zeurt nu niet meer, want door de check hierboven bestaat .campaign zeker weten.
     hasAccess = offer.campaign.members.some(m => m.userId === session.userId);
   }
 
@@ -67,8 +71,7 @@ export default async function OfferPage({
     );
   }
 
-  // --- 3. DATA VERWERKEN VOOR GRAFIEKEN ---
-  // Dit lijkt op de logica van het dashboard, maar dan specifiek voor 1 offer.
+  // --- 3. DATA VERWERKEN ---
   
   const queryParams = await searchParams;
   const range = queryParams.range || 'this_month';
@@ -77,11 +80,9 @@ export default async function OfferPage({
   let start = startOfMonth(now);
   let end = getEndOfDay(endOfMonth(now));
 
-  // Simpele datum logica (kan uitgebreid worden zoals in dashboard)
   if (range === 'this_year') { start = new Date(now.getFullYear(), 0, 1); }
   if (range === 'all') { start = new Date('2020-01-01'); }
 
-  // Filter conversies op datum
   const filteredConversions = offer.conversions.filter(c => c.date >= start && c.date <= end);
 
   let totalRevenue = 0;
@@ -114,13 +115,12 @@ export default async function OfferPage({
     }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // We geven de data door aan een Client Component voor de weergave
   return (
     <OfferClient 
       offer={offer}
       chartData={chartData}
       totals={{ revenue: totalRevenue, leads: totalLeads, sales: totalSales }}
-      campaignType={offer.campaign.type}
+      campaignType={offer.campaign.type} // Ook hier weet TS nu dat campaign bestaat
     />
   );
 }
