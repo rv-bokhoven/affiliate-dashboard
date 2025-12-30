@@ -1,7 +1,9 @@
 import { prisma } from '@/lib/db';
 import DashboardClient from '@/components/DashboardClient';
 import { cookies } from 'next/headers';
-import Link from 'next/link'; // <--- Importeer Link
+import Link from 'next/link';
+import { getSession } from '@/lib/auth'; // <--- Vergeet deze niet
+import { redirect } from 'next/navigation';
 import { 
   startOfMonth, endOfMonth, subMonths, 
   startOfWeek, endOfWeek, subWeeks, 
@@ -38,46 +40,65 @@ export default async function Page({
 }) {
   const params = await searchParams;
   const cookieStore = await cookies();
+  const session: any = await getSession();
 
-  // 1. HAAL ALLE PROJECTEN OP (Lichtgewicht query)
-  const allCampaigns = await prisma.campaign.findMany({ 
-      select: { id: true, name: true },
-      orderBy: { id: 'asc' }
-  });
+  // Als er geen sessie is, laat de middleware het werk doen, maar voor de zekerheid:
+  if (!session) redirect('/login');
 
-  // SCENARIO A: Helemaal geen projecten in de database
-  if (allCampaigns.length === 0) {
+  // 1. BEPAAL TOT WELKE PROJECTEN DEZE USER TOEGANG HEEFT
+  let allowedCampaigns: { id: number; name: string }[] = [];
+
+  if (session.role === 'SUPER_ADMIN') {
+      // Admin ziet alles
+      allowedCampaigns = await prisma.campaign.findMany({ 
+          select: { id: true, name: true },
+          orderBy: { id: 'asc' }
+      });
+  } else {
+      // User ziet alleen eigen projecten
+      allowedCampaigns = await prisma.campaign.findMany({ 
+          where: {
+            members: { some: { userId: session.userId } }
+          },
+          select: { id: true, name: true },
+          orderBy: { id: 'asc' }
+      });
+  }
+
+  // SCENARIO: Helemaal geen toegang tot projecten
+  if (allowedCampaigns.length === 0) {
       return (
           <div className="flex flex-col items-center justify-center h-[80vh] text-center p-4">
               <h1 className="text-2xl font-bold text-white mb-2">Welkom bij Affiliate Pro 🚀</h1>
-              <p className="text-neutral-400 mb-6">Er zijn nog geen projecten gevonden.</p>
-              <Link href="/settings" className="bg-white text-black px-6 py-2 rounded font-medium hover:bg-neutral-200 transition">
-                  + Maak je eerste project aan
-              </Link>
+              <p className="text-neutral-400 mb-6">Je bent nog niet gekoppeld aan een project.</p>
+              {session.role === 'SUPER_ADMIN' && (
+                  <Link href="/settings" className="bg-white text-black px-6 py-2 rounded font-medium hover:bg-neutral-200 transition">
+                      + Maak je eerste project aan
+                  </Link>
+              )}
           </div>
       );
   }
 
-  // 2. BEPAAL ACTIEVE ID
-  let campaignId = 0;
+  // 2. BEPAAL HET GEWENSTE ID (Uit URL of Cookie)
+  let requestedId = 0;
   
-  // A. Check URL
   if (params.campaignId) {
-      campaignId = parseInt(params.campaignId);
-  } 
-  // B. Check Cookie
-  else {
+      requestedId = parseInt(params.campaignId);
+  } else {
       const cookieId = cookieStore.get('activeCampaignId')?.value;
-      if (cookieId) campaignId = parseInt(cookieId);
+      if (cookieId) requestedId = parseInt(cookieId);
   }
 
-  // C. Validatie: Bestaat dit ID wel? Zo niet, pak de eerste uit de lijst.
-  const projectExists = allCampaigns.find(c => c.id === campaignId);
-  if (!projectExists) {
-      campaignId = allCampaigns[0].id;
-      // We updaten de cookie niet server-side (is lastig in page.tsx), 
-      // maar we gebruiken nu wel een geldig ID voor de data-fetch.
-  }
+  // 3. STRICT CHECK: MAG DEZE USER DIT ID ZIEN?
+  // We zoeken of het requestedId voorkomt in de lijst met toegestane projecten.
+  const hasAccess = allowedCampaigns.find(c => c.id === requestedId);
+
+  // Zo niet (of als er geen ID was)? Pak dan de EERSTE uit de toegestane lijst.
+  // Dit lost het probleem op van de user die Project 1 zag terwijl hij dat niet mocht.
+  const campaignId = hasAccess ? requestedId : allowedCampaigns[0].id;
+
+  // --- VANAF HIER LADEN WE DE DATA VOOR HET DEFINITIEVE ID ---
 
   const { range, from, to, interval } = params;
   const { start, end } = getDateRange(range || 'this_month', from, to);
@@ -103,8 +124,7 @@ export default async function Page({
 
   if (!campaign) return <div className="p-10 text-white">Geen data geladen.</div>;
 
-  // --- BEREKENINGEN (De rest is ongewijzigd) ---
-
+  // ... BEREKENINGEN (Precies zoals voorheen) ...
   let totalSpend = 0;
   let googleSpend = 0;
   let microsoftSpend = 0;
