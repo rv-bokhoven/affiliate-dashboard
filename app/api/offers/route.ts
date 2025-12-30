@@ -1,81 +1,68 @@
-// app/api/offers/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-// 1. GET: Haal offers op (eventueel gefilterd op campaignId)
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const campaignId = searchParams.get('campaignId');
-
-  // Als er een ID is meegegeven, filter daarop. Anders alles.
-  const where = campaignId ? { campaignId: parseInt(campaignId) } : {};
-
-  const offers = await prisma.offer.findMany({ 
-    where,
-    include: { network: true }, // Haal de naam van de partner op
-    orderBy: { name: 'asc' } 
-  });
-  
-  return NextResponse.json(offers);
-}
-
-// 2. POST: Nieuwe offer aanmaken
-export async function POST(req: Request) {
+export async function GET() {
   try {
-    const body = await req.json();
-    // Let op: we lezen nu networkId en campaignId
-    const { name, networkId, campaignId, payoutLead, payoutSale, capLeads, capRevenue, status } = body;
-
-    const offer = await prisma.offer.create({
-      data: {
-        name,
-        // Koppel aan Partner (Netwerk) en Campagne
-        networkId: networkId ? parseInt(networkId) : undefined,
-        campaignId: campaignId ? parseInt(campaignId) : undefined,
-
-        payoutLead: parseFloat(payoutLead || 0),
-        payoutSale: parseFloat(payoutSale || 0),
-        
-        // Caps
-        capLeads: capLeads ? parseInt(capLeads) : undefined,
-        capRevenue: capRevenue ? parseFloat(capRevenue) : undefined,
-        
-        status: status || 'ACTIVE'
-      },
+    const offers = await prisma.offer.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        network: true // <--- DIT IS DE FIX: Laad de netwerk data mee
+      }
     });
-    return NextResponse.json(offer);
+
+    // We sturen gewoon het hele object terug, de frontend filtert wel wat het nodig heeft.
+    // Geen handmatige .map() nodig hier die voor errors zorgt.
+    return NextResponse.json(offers);
+
   } catch (error) {
-    console.error("Error creating offer:", error);
-    return NextResponse.json({ error: 'Fout bij aanmaken offer' }, { status: 500 });
+    console.error('Error fetching offers:', error);
+    return NextResponse.json({ error: 'Error fetching offers' }, { status: 500 });
   }
 }
 
-// 3. PUT: Update een bestaande offer
-export async function PUT(req: Request) {
+// ... Laat de POST en PUT functies staan zoals ze waren ...
+export async function POST(req: Request) {
+  // ... (Je bestaande create code)
   try {
     const body = await req.json();
-    const { id, name, networkId, payoutLead, payoutSale, capLeads, capRevenue, status } = body;
-
-    const updatedOffer = await prisma.offer.update({
-      where: { id: parseInt(id) },
+    const offer = await prisma.offer.create({
       data: {
-        name,
-        // Update relatie naar netwerk
-        networkId: networkId ? parseInt(networkId) : null,
-        
-        payoutLead: parseFloat(payoutLead || 0),
-        payoutSale: parseFloat(payoutSale || 0),
-        
-        capLeads: capLeads ? parseInt(capLeads) : null, // null om te resetten
-        capRevenue: capRevenue ? parseFloat(capRevenue) : null,
-        
-        status: status // Update status (bijv. PAUSED)
+        name: body.name,
+        networkId: body.networkId,
+        campaignId: body.campaignId,
+        payoutLead: body.payoutLead,
+        payoutSale: body.payoutSale,
+        capLeads: body.capLeads,
+        capRevenue: body.capRevenue,
+        status: body.status || 'ACTIVE'
       },
+      include: { network: true }
     });
+    return NextResponse.json(offer);
+  } catch(e) {
+    return NextResponse.json({ error: 'Error' }, { status: 500 });
+  }
+}
 
-    return NextResponse.json(updatedOffer);
-  } catch (error) {
-    console.error("Error updating offer:", error);
-    return NextResponse.json({ error: 'Update mislukt' }, { status: 500 });
+export async function PUT(req: Request) {
+  // ... (Je bestaande update code)
+  try {
+    const body = await req.json();
+    const offer = await prisma.offer.update({
+        where: { id: body.id },
+        data: {
+            name: body.name,
+            networkId: body.networkId,
+            payoutLead: body.payoutLead,
+            payoutSale: body.payoutSale,
+            capLeads: body.capLeads,
+            capRevenue: body.capRevenue,
+            status: body.status
+        },
+        include: { network: true }
+    });
+    return NextResponse.json(offer);
+  } catch(e) {
+    return NextResponse.json({ error: 'Error' }, { status: 500 });
   }
 }
