@@ -37,8 +37,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-neutral-900 border border-neutral-800 rounded-xl p-8">
-        <h1 className="text-2xl font-bold text-white mb-2 text-center">Affiliate Pro</h1>
-        <p className="text-neutral-500 text-center mb-6">Log in om verder te gaan</p>
+        <h1 className="text-2xl font-bold text-white mb-2 text-center">Tedlytics Pro</h1>
+        <p className="text-neutral-500 text-center mb-6">Login to continue</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
