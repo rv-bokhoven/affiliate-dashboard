@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import DashboardClient from '@/components/DashboardClient';
 import { cookies } from 'next/headers';
+import Link from 'next/link'; // <--- Importeer Link
 import { 
   startOfMonth, endOfMonth, subMonths, 
   startOfWeek, endOfWeek, subWeeks, 
@@ -38,21 +39,53 @@ export default async function Page({
   const params = await searchParams;
   const cookieStore = await cookies();
 
-  const { range, from, to, interval, campaignId: urlCampaignId } = params;
-  const cookieCampaignId = cookieStore.get('activeCampaignId')?.value;
+  // 1. HAAL ALLE PROJECTEN OP (Lichtgewicht query)
+  const allCampaigns = await prisma.campaign.findMany({ 
+      select: { id: true, name: true },
+      orderBy: { id: 'asc' }
+  });
 
-  let campaignId = 1;
-  if (urlCampaignId) campaignId = parseInt(urlCampaignId);
-  else if (cookieCampaignId) campaignId = parseInt(cookieCampaignId);
+  // SCENARIO A: Helemaal geen projecten in de database
+  if (allCampaigns.length === 0) {
+      return (
+          <div className="flex flex-col items-center justify-center h-[80vh] text-center p-4">
+              <h1 className="text-2xl font-bold text-white mb-2">Welkom bij Affiliate Pro 🚀</h1>
+              <p className="text-neutral-400 mb-6">Er zijn nog geen projecten gevonden.</p>
+              <Link href="/settings" className="bg-white text-black px-6 py-2 rounded font-medium hover:bg-neutral-200 transition">
+                  + Maak je eerste project aan
+              </Link>
+          </div>
+      );
+  }
 
+  // 2. BEPAAL ACTIEVE ID
+  let campaignId = 0;
+  
+  // A. Check URL
+  if (params.campaignId) {
+      campaignId = parseInt(params.campaignId);
+  } 
+  // B. Check Cookie
+  else {
+      const cookieId = cookieStore.get('activeCampaignId')?.value;
+      if (cookieId) campaignId = parseInt(cookieId);
+  }
+
+  // C. Validatie: Bestaat dit ID wel? Zo niet, pak de eerste uit de lijst.
+  const projectExists = allCampaigns.find(c => c.id === campaignId);
+  if (!projectExists) {
+      campaignId = allCampaigns[0].id;
+      // We updaten de cookie niet server-side (is lastig in page.tsx), 
+      // maar we gebruiken nu wel een geldig ID voor de data-fetch.
+  }
+
+  const { range, from, to, interval } = params;
   const { start, end } = getDateRange(range || 'this_month', from, to);
   const currentInterval = interval || 'day';
   
   const now = new Date();
   const currentMonthStart = startOfMonth(now);
   const currentMonthEnd = getEndOfDay(endOfMonth(now));
-
-  const allCampaigns = await prisma.campaign.findMany({ select: { id: true, name: true } });
 
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
@@ -68,21 +101,9 @@ export default async function Page({
     }
   });
 
-  const rawCapOffers = await prisma.offer.findMany({
-    where: {
-      campaignId: campaignId,
-      status: 'ACTIVE', 
-      OR: [ { capLeads: { not: null } }, { capRevenue: { not: null } } ]
-    },
-    include: {
-      network: true,
-      conversions: { where: { date: { gte: currentMonthStart, lte: currentMonthEnd } } }
-    }
-  });
+  if (!campaign) return <div className="p-10 text-white">Geen data geladen.</div>;
 
-  if (!campaign) return <div className="p-10 text-white">Geen campagne gevonden (ID {campaignId}).</div>;
-
-  // --- BEREKENINGEN ---
+  // --- BEREKENINGEN (De rest is ongewijzigd) ---
 
   let totalSpend = 0;
   let googleSpend = 0;
@@ -92,10 +113,8 @@ export default async function Page({
   let totalSales = 0;
   let totalRevShare = 0; 
 
-  // Map bevat nu ook leads & sales per dag
   const chartMap = new Map<string, { spend: number, revenue: number, leads: number, sales: number }>();
 
-  // 1. Spend
   campaign.dailySpends.forEach(spend => {
     const amountUSD = spend.currency === 'EUR' ? spend.amount * spend.exchangeRate : spend.amount;
     totalSpend += amountUSD;
@@ -108,7 +127,6 @@ export default async function Page({
     chartMap.set(key, { ...current, spend: current.spend + amountUSD });
   });
 
-  // 2. Revenue & Offers (Hier voegen we leads/sales per dag toe)
   let totalRevenue = 0;
   
   const processedTopOffers = campaign.offers.map(offer => {
@@ -122,15 +140,14 @@ export default async function Page({
       leads += conv.leads;
       sales += conv.sales;
 
-      // Chart Data vullen
       const key = getGroupKey(conv.date, currentInterval);
       const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
       
       chartMap.set(key, { 
           ...current, 
           revenue: current.revenue + rev,
-          leads: current.leads + conv.leads, // <--- Dagelijkse leads
-          sales: current.sales + conv.sales  // <--- Dagelijkse sales
+          leads: current.leads + conv.leads, 
+          sales: current.sales + conv.sales  
       });
     });
 
@@ -149,7 +166,6 @@ export default async function Page({
 
   totalRevenue = processedTopOffers.reduce((acc, curr) => acc + curr.revenue, 0);
 
-  // 3. Adjustments
   campaign.adjustments.forEach(adj => {
     totalRevenue += adj.amount;
     totalRevShare += adj.amount;
@@ -162,14 +178,13 @@ export default async function Page({
   const profit = totalRevenue - totalSpend;
   const roi = totalSpend > 0 ? (profit / totalSpend) * 100 : 0;
 
-  // Chart Data Array maken
   const chartData = Array.from(chartMap.entries())
     .map(([date, vals]) => ({
       date,
       spend: vals.spend,
       revenue: vals.revenue,
-      leads: vals.leads, // <--- Doorsturen naar client
-      sales: vals.sales, // <--- Doorsturen naar client
+      leads: vals.leads, 
+      sales: vals.sales, 
       profit: vals.revenue - vals.spend,
       roi: vals.spend > 0 ? ((vals.revenue - vals.spend) / vals.spend) * 100 : 0
     }))
@@ -179,6 +194,18 @@ export default async function Page({
     .filter(o => o.revenue > 0)
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10);
+
+  const rawCapOffers = await prisma.offer.findMany({
+    where: {
+      campaignId: campaignId,
+      status: 'ACTIVE', 
+      OR: [ { capLeads: { not: null } }, { capRevenue: { not: null } } ]
+    },
+    include: {
+      network: true,
+      conversions: { where: { date: { gte: currentMonthStart, lte: currentMonthEnd } } }
+    }
+  });
 
   const capOffers = rawCapOffers.map(offer => {
     let currentRevenue = 0;
