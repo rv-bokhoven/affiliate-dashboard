@@ -119,7 +119,7 @@ export default function Sidebar({ campaigns, activeCampaignId, user, currentRole
         <p className="px-3 text-xs font-medium text-neutral-500 mb-2 mt-2 uppercase tracking-wider">Platform</p>
         {navItem('/', <LayoutDashboard size={18} />, 'Overview')}
         {navItem('/offers', <Tags size={18} />, 'Offers')}
-        {navItem('/finance', <Wallet size={18} />, 'Finance')}
+        {navItem('/finance', <Wallet size={18} />, 'Revshare')}
         <p className="px-3 text-xs font-medium text-neutral-500 mb-2 mt-6 uppercase tracking-wider">Tools</p>
         {navItem('/input', <PenLine size={18} />, 'Daily Input')}
         {navItem('/logs', <ClipboardList size={18} />, 'Logs')}
