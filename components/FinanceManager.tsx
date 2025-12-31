@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { format, subMonths, addMonths, parseISO, startOfMonth } from 'date-fns';
+import { format, subMonths, addMonths, parseISO, startOfMonth, addHours } from 'date-fns';
 import { nl } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, Trash2, TrendingUp, TrendingDown, Tag } from 'lucide-react';
 import { toast } from 'sonner';
