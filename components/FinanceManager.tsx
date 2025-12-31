@@ -60,7 +60,7 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !description) return;
-
+    const safeDate = addHours(currentMonth, 12);
     try {
       const res = await fetch('/api/finance', {
         method: 'POST',
@@ -69,7 +69,7 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
             description,
             type,
             campaignId,
-            date: currentMonth.toISOString(),
+            date: safeDate.toISOString(),
             offerId: selectedOfferId || null // <--- Stuur mee (of null als leeg)
         })
       });
