@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  // Vercel vult deze variabelen automatisch in, dus dit werkt direct
   url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
@@ -19,7 +18,8 @@ model AffiliateNetwork {
   name          String   @unique 
   
   offers        Offer[]
-  adjustments   RevenueAdjustment[] 
+  // CORRECTIE: Verwijst nu naar Adjustment (was RevenueAdjustment)
+  adjustments   Adjustment[] 
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -30,17 +30,18 @@ model Campaign {
   id          Int          @id @default(autoincrement())
   name        String
   
-  // AANGEPAST: String met quotes om de default waarde
   type        String       @default("PAID") 
   currency    String       @default("USD")
-  logo        String?  @default("") // URL naar het logo 
+  logo        String?      @default("") 
 
   offers      Offer[]
   dailySpends DailySpend[]
-  adjustments RevenueAdjustment[]
+  
+  // Deze stond al goed
+  adjustments Adjustment[]
+  
   logs        DailyLog[]
   members     CampaignMember[]
-
 
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -49,32 +50,38 @@ model Campaign {
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  password  String   // Hashed wachtwoord
+  password  String   
   name      String?
-  role      String   @default("USER") // "SUPER_ADMIN" of "USER"
+  role      String   @default("USER") 
   
   memberships CampaignMember[]
 }
 
 // Handmatige inkomsten (Bonussen, RevShare correcties, SEO maandbedragen)
-model RevenueAdjustment {
+model Adjustment {
   id            Int      @id @default(autoincrement())
   date          DateTime
   amount        Float
   currency      String   @default("USD")
-  description   String?  
+  description   String?
+
+  // CORRECTIE: Netwerk optioneel gemaakt (Int?), want finance tool gebruikt dit niet altijd
+  networkId     Int?
+  network       AffiliateNetwork? @relation(fields: [networkId], references: [id])
   
-  networkId     Int
-  network       AffiliateNetwork @relation(fields: [networkId], references: [id])
-  
-  campaignId    Int?
-  campaign      Campaign? @relation(fields: [campaignId], references: [id])
+  // CORRECTIE: Campaign verplicht gemaakt (Int), want een finance item hoort bij een project
+  campaignId    Int
+  campaign      Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   offerId       Int?
-  offer         Offer?    @relation(fields: [offerId], references: [id])
+  offer         Offer?   @relation(fields: [offerId], references: [id])
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Indexen voor snelheid
+  @@index([campaignId])
+  @@index([date])
 }
 
 // --------------------------------------
@@ -88,7 +95,6 @@ model DailySpend {
   
   amount       Float    
   currency     String   @default("EUR") 
-  
   exchangeRate Float    @default(1.0) 
 
   campaignId   Int?
@@ -98,20 +104,19 @@ model DailySpend {
   updatedAt    DateTime @updatedAt
 
   @@unique([date, platform, campaignId], name: "date_platform_campaign")
+  @@index([date])
+  @@index([campaignId])
 }
 
 model Offer {
   id            Int          @id @default(autoincrement())
   name          String
 
-  // MIGRATIE: Oude kolom behouden
   networkLegacy String?      @map("network")
 
-  // Nieuwe koppeling
   networkId     Int?
   network       AffiliateNetwork? @relation(fields: [networkId], references: [id])
   
-  // AANGEPAST: String met quotes om de default waarde
   status        String       @default("ACTIVE") 
   
   payoutLead    Float        @default(0)
@@ -121,13 +126,17 @@ model Offer {
   capRevenue    Float?
 
   campaignId    Int?
-  campaign      Campaign? @relation(fields: [campaignId], references: [id])
+  campaign      Campaign?    @relation(fields: [campaignId], references: [id])
 
   conversions   Conversion[]
   
-  adjustments   RevenueAdjustment[]
+  // CORRECTIE: Verwijst nu naar Adjustment (was RevenueAdjustment)
+  adjustments   Adjustment[]
+  
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+
+  @@index([campaignId])
 }
 
 model Conversion {
@@ -135,7 +144,7 @@ model Conversion {
   date      DateTime
   
   offerId   Int
-  offer     Offer    @relation(fields: [offerId], references: [id])
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
   
   leads     Int      @default(0)
   sales     Int      @default(0)
@@ -143,14 +152,19 @@ model Conversion {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Dit is voor je import script (om dubbele te voorkomen)
+  externalId String?   @unique 
+
   @@unique([date, offerId], name: "date_offerId")
+  @@index([date])
+  @@index([offerId])
 }
 
 model DailyLog {
   id          Int      @id @default(autoincrement())
   date        DateTime
-  type        String   // Bijv: 'spend' of 'conversions'
-  data        String     // Hier slaan we de flexibele data in op (Google spend, list of leads, etc.)
+  type        String   
+  data        String   
   
   campaignId  Int
   campaign    Campaign @relation(fields: [campaignId], references: [id])
@@ -158,10 +172,9 @@ model DailyLog {
   createdAt   DateTime @default(now())
 }
 
-// NIEUW MODEL
 model CampaignMember {
   id          Int      @id @default(autoincrement())
-  role        String   @default("MEMBER") // ADMIN of VIEWER binnen het project
+  role        String   @default("MEMBER") 
   
   userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -169,5 +182,5 @@ model CampaignMember {
   campaignId  Int
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, campaignId]) // Voorkomt dubbele toevoegingen
+  @@unique([userId, campaignId]) 
 }
