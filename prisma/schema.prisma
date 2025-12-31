@@ -64,6 +64,7 @@ model Adjustment {
   amount        Float
   currency      String   @default("USD")
   description   String?
+  type          String
 
   // CORRECTIE: Netwerk optioneel gemaakt (Int?), want finance tool gebruikt dit niet altijd
   networkId     Int?
