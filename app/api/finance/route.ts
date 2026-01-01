@@ -51,17 +51,48 @@ export async function POST(req: Request) {
     
     if (!body.campaignId) return NextResponse.json({ error: 'Campaign ID is missing' }, { status: 400 });
 
-    // NIEUW: Check of offerId is meegegeven (en niet leeg is)
+    const campaignId = parseInt(body.campaignId);
     const offerId = body.offerId ? parseInt(body.offerId) : null;
+    const dateObj = new Date(body.date);
 
+    // LOGICA VOOR OFFERS: CHECK OF ER AL IETS BESTAAT IN DEZE MAAND
+    if (offerId) {
+        const start = startOfMonth(dateObj);
+        const end = endOfMonth(dateObj);
+
+        // Zoek naar bestaande adjustment voor DIT offer in DEZE maand
+        const existingAdjustment = await prisma.adjustment.findFirst({
+            where: {
+                campaignId: campaignId,
+                offerId: offerId,
+                date: { gte: start, lte: end }
+            }
+        });
+
+        // BESTAAT HIJ AL? -> UPDATE (Overschrijven)
+        if (existingAdjustment) {
+            const updated = await prisma.adjustment.update({
+                where: { id: existingAdjustment.id },
+                data: {
+                    amount: parseFloat(body.amount),
+                    description: body.description,
+                    type: body.type,
+                    date: dateObj // Update datum (bijv. als je later in de maand update)
+                }
+            });
+            return NextResponse.json(updated);
+        }
+    }
+
+    // BESTAAT NIET (OF GEEN OFFER GESELECTEERD)? -> CREATE (Nieuwe aanmaken)
     const adjustment = await prisma.adjustment.create({
       data: {
         amount: parseFloat(body.amount),
         description: body.description,
         type: body.type, 
-        date: new Date(body.date), 
-        campaignId: parseInt(body.campaignId),
-        offerId: offerId // <--- Opslaan!
+        date: dateObj, 
+        campaignId: campaignId,
+        offerId: offerId 
       }
     });
 
