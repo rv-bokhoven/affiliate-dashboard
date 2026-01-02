@@ -1,68 +1,103 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { getSession } from '@/lib/auth'; // Zorg dat deze import klopt
 
-export async function GET() {
+export async function GET(req: Request) {
+  const session: any = await getSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
+    const { searchParams } = new URL(req.url);
+    const campaignId = searchParams.get('campaignId');
+
+    // Als er een campaignId is, filteren we daarop (handig voor dropdowns)
+    const where = campaignId ? { campaignId: parseInt(campaignId) } : {};
+
     const offers = await prisma.offer.findMany({
+      where,
       orderBy: { name: 'asc' },
       include: {
-        network: true // <--- DIT IS DE FIX: Laad de netwerk data mee
+        network: true 
       }
     });
 
-    // We sturen gewoon het hele object terug, de frontend filtert wel wat het nodig heeft.
-    // Geen handmatige .map() nodig hier die voor errors zorgt.
     return NextResponse.json(offers);
-
   } catch (error) {
     console.error('Error fetching offers:', error);
     return NextResponse.json({ error: 'Error fetching offers' }, { status: 500 });
   }
 }
 
-// ... Laat de POST en PUT functies staan zoals ze waren ...
 export async function POST(req: Request) {
-  // ... (Je bestaande create code)
+  const session: any = await getSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     const body = await req.json();
+    
+    // Validatie: CampaignID is verplicht
+    if (!body.campaignId) {
+        return NextResponse.json({ error: 'Campaign ID missing' }, { status: 400 });
+    }
+
     const offer = await prisma.offer.create({
       data: {
         name: body.name,
-        networkId: body.networkId,
-        campaignId: body.campaignId,
-        payoutLead: body.payoutLead,
-        payoutSale: body.payoutSale,
-        capLeads: body.capLeads,
-        capRevenue: body.capRevenue,
+        campaignId: parseInt(body.campaignId),
+        networkId: body.networkId ? parseInt(body.networkId) : null,
+        
+        // NIEUW: Currency opslaan (default naar USD als leeg)
+        currency: body.currency || 'USD',
+
+        // Getallen veilig parsen (voorkomt crashes)
+        payoutLead: parseFloat(body.payoutLead || 0),
+        payoutSale: parseFloat(body.payoutSale || 0),
+        
+        capLeads: body.capLeads ? parseInt(body.capLeads) : null,
+        capRevenue: body.capRevenue ? parseFloat(body.capRevenue) : null,
+        
         status: body.status || 'ACTIVE'
       },
       include: { network: true }
     });
     return NextResponse.json(offer);
   } catch(e) {
-    return NextResponse.json({ error: 'Error' }, { status: 500 });
+    console.error(e);
+    return NextResponse.json({ error: 'Error creating offer' }, { status: 500 });
   }
 }
 
 export async function PUT(req: Request) {
-  // ... (Je bestaande update code)
+  const session: any = await getSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     const body = await req.json();
+    
+    if (!body.id) return NextResponse.json({ error: 'ID missing' }, { status: 400 });
+
     const offer = await prisma.offer.update({
-        where: { id: body.id },
+        where: { id: parseInt(body.id) },
         data: {
             name: body.name,
-            networkId: body.networkId,
-            payoutLead: body.payoutLead,
-            payoutSale: body.payoutSale,
-            capLeads: body.capLeads,
-            capRevenue: body.capRevenue,
+            networkId: body.networkId ? parseInt(body.networkId) : null,
+            
+            // NIEUW: Currency updaten
+            currency: body.currency,
+
+            payoutLead: parseFloat(body.payoutLead || 0),
+            payoutSale: parseFloat(body.payoutSale || 0),
+            
+            capLeads: body.capLeads ? parseInt(body.capLeads) : null,
+            capRevenue: body.capRevenue ? parseFloat(body.capRevenue) : null,
+            
             status: body.status
         },
         include: { network: true }
     });
     return NextResponse.json(offer);
   } catch(e) {
-    return NextResponse.json({ error: 'Error' }, { status: 500 });
+    console.error(e);
+    return NextResponse.json({ error: 'Error updating offer' }, { status: 500 });
   }
 }

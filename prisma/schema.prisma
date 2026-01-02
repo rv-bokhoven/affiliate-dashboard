@@ -121,6 +121,8 @@ model Offer {
   network       AffiliateNetwork? @relation(fields: [networkId], references: [id])
   
   status        String       @default("ACTIVE") 
+
+  currency      String       @default("USD") // <--- DEZE REGEL TOEVOEGEN
   
   payoutLead    Float        @default(0)
   payoutSale    Float        @default(0)

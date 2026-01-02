@@ -165,19 +165,25 @@ export default async function Page({
   });
 
   
-  // 2. Verwerk OFFERS
+// 2. Verwerk OFFERS
   const processedTopOffers = campaign.offers.map(offer => {
     let offerRevenue = 0;
     
-    // AANGEPAST: Reken payouts om naar de weergave valuta
-    // We gaan ervan uit dat offer payouts in de DB in USD staan (rate 1.0)
-    const payoutLeadConv = convert(offer.payoutLead, 'USD', 1.0);
-    const payoutSaleConv = convert(offer.payoutSale, 'USD', 1.0);
+    // NIEUWE LOGICA: Bepaal de koers van DIT offer
+    // Als het offer in EUR is, gebruiken we de vaste koers (1.17). Anders 1.0.
+    // (We halen de currency op uit de database, fallback is 'USD')
+    const offerCurrency = offer.currency || 'USD';
+    const offerRate = offerCurrency === 'EUR' ? 1.17 : 1.0;
+
+    // Reken de payout per lead/sale om naar de weergave valuta via convert()
+    const payoutLeadConv = convert(offer.payoutLead, offerCurrency, offerRate);
+    const payoutSaleConv = convert(offer.payoutSale, offerCurrency, offerRate);
 
     let leads = 0;
     let sales = 0;
 
     offer.conversions.forEach(conv => {
+      // Nu gebruiken we de geconverteerde payouts
       const rev = (conv.leads * payoutLeadConv) + (conv.sales * payoutSaleConv);
       offerRevenue += rev;
       leads += conv.leads;
