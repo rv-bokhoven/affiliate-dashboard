@@ -7,19 +7,21 @@ import { nl } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, Trash2, TrendingUp, TrendingDown, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Type update: offer naam kan nu meekomen
+// Configuratie voor de wisselkoers (je kunt dit later ook uit een settings file halen)
+const EUR_TO_USD_RATE = 1.17;
+
 interface Adjustment { 
     id: number; 
     amount: number; 
     description: string; 
     type: string; 
     date: string;
-    offer?: { name: string } | null; // <--- NIEUW
+    offer?: { name: string } | null;
+    currency: string; // <--- Toegevoegd voor weergave
 }
 
 interface Offer { id: number; name: string; }
 
-// Props update: we ontvangen nu ook offers
 export default function FinanceManager({ campaignId, offers }: { campaignId: number; offers: Offer[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,7 +35,10 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState('BONUS');
-  const [selectedOfferId, setSelectedOfferId] = useState(''); // <--- NIEUW STATE
+  const [selectedOfferId, setSelectedOfferId] = useState('');
+  
+  // NIEUW: Valuta state
+  const [currency, setCurrency] = useState('USD'); 
 
   useEffect(() => {
     fetchData();
@@ -60,7 +65,13 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !description) return;
+    
+    // Tijdzone correctie
     const safeDate = addHours(currentMonth, 12);
+
+    // Bepaal de wisselkoers
+    const rate = currency === 'EUR' ? EUR_TO_USD_RATE : 1.0;
+
     try {
       const res = await fetch('/api/finance', {
         method: 'POST',
@@ -70,7 +81,10 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
             type,
             campaignId,
             date: safeDate.toISOString(),
-            offerId: selectedOfferId || null // <--- Stuur mee (of null als leeg)
+            offerId: selectedOfferId || null,
+            // NIEUWE DATA:
+            currency,
+            exchangeRate: rate
         })
       });
 
@@ -78,7 +92,7 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
         toast.success('Toegevoegd!');
         setAmount('');
         setDescription('');
-        setSelectedOfferId(''); // Reset selectie
+        setSelectedOfferId(''); 
         fetchData(); 
         router.refresh(); 
       } else {
@@ -96,6 +110,8 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
       router.refresh();
   };
 
+  // Totaal berekening (simpel, telt nu alles bij elkaar op ongeacht valuta, 
+  // in het dashboard doen we dit preciezer)
   const total = items.reduce((acc, item) => acc + item.amount, 0);
 
   return (
@@ -106,7 +122,7 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
         <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white transition"><ChevronLeft size={20} /></button>
         <div className="text-center">
             <h2 className="text-xl font-bold text-white capitalize">{format(currentMonth, 'MMMM yyyy', { locale: nl })}</h2>
-            <p className="text-xs text-neutral-500 font-mono mt-1">Netto: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}</p>
+            <p className="text-xs text-neutral-500 font-mono mt-1">Totaal (Indicatie): {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}</p>
         </div>
         <button onClick={() => changeMonth(1)} className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white transition"><ChevronRight size={20} /></button>
       </div>
@@ -128,7 +144,7 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
                         </div>
                     </div>
 
-                    {/* OFFER SELECTIE (NIEUW) */}
+                    {/* OFFER SELECTIE */}
                     <div>
                         <label className="block text-xs font-medium text-neutral-500 uppercase mb-1">Koppel aan Offer (Optioneel)</label>
                         <select 
@@ -143,15 +159,28 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
                         </select>
                     </div>
 
-                    {/* OVERIGE VELDEN */}
+                    {/* OMSCHRIJVING */}
                     <div>
                         <label className="block text-xs font-medium text-neutral-500 uppercase mb-1">Omschrijving</label>
                         <input type="text" value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-3 py-2 text-sm text-white focus:border-neutral-600 outline-none" placeholder="Omschrijving..." />
                     </div>
+
+                    {/* BEDRAG & VALUTA SELECTOR */}
                     <div>
-                        <label className="block text-xs font-medium text-neutral-500 uppercase mb-1">Bedrag ($)</label>
-                        <input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-md px-3 py-2 text-sm text-white focus:border-neutral-600 outline-none" placeholder="0.00" />
+                        <label className="block text-xs font-medium text-neutral-500 uppercase mb-1">Bedrag</label>
+                        <div className="flex gap-2">
+                             <select 
+                                value={currency}
+                                onChange={(e) => setCurrency(e.target.value)}
+                                className="bg-neutral-950 border border-neutral-800 rounded-md px-3 py-2 text-sm text-white focus:border-neutral-600 outline-none w-24"
+                            >
+                                <option value="USD">$ USD</option>
+                                <option value="EUR">€ EUR</option>
+                            </select>
+                            <input type="number" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} className="flex-1 bg-neutral-950 border border-neutral-800 rounded-md px-3 py-2 text-sm text-white focus:border-neutral-600 outline-none" placeholder="0.00" />
+                        </div>
                     </div>
+
                     <button type="submit" className="w-full bg-white text-black font-medium py-2 rounded-md hover:bg-neutral-200 transition flex items-center justify-center gap-2">
                         <Plus size={16} /> Opslaan
                     </button>
@@ -185,7 +214,7 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
                         </div>
                         <div className="flex items-center gap-4">
                             <span className={`font-mono font-medium ${item.amount >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                {item.amount >= 0 ? '+' : ''}{item.amount.toFixed(2)}
+                                {item.amount >= 0 ? '+' : ''}{item.currency === 'EUR' ? '€' : '$'}{item.amount.toFixed(2)}
                             </span>
                             <button onClick={() => handleDelete(item.id)} className="text-neutral-600 hover:text-red-500 transition opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                         </div>

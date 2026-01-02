@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import "react-datepicker.css"; // Let op: soms is het pad 'react-datepicker/dist/react-datepicker.css' afhankelijk van je setup
 import { registerLocale } from "react-datepicker";
 import { nl } from 'date-fns/locale';
 import {
@@ -15,7 +15,7 @@ import PageContainer from './PageContainer';
 
 registerLocale('nl', nl);
 
-// ... Interfaces blijven hetzelfde ...
+// --- Interfaces ---
 interface DashboardData {
   date: string;
   spend: number;
@@ -27,16 +27,41 @@ interface DashboardData {
   googleSpend?: number;
   microsoftSpend?: number;
 }
-export interface TopOffer { id: number; name: string; network: string; leads: number; sales: number; revenue: number; capLeads?: number | null; capRevenue?: number | null; }
-interface DashboardClientProps {
-  data: DashboardData[]; topOffers: TopOffer[]; capOffers: TopOffer[];
-  totals: { spend: number; revenue: number; profit: number; roi: number; googleSpend: number; microsoftSpend: number; leads: number; sales: number; revShare: number; };
-  campaignName: string; campaignType: string;
+
+export interface TopOffer { 
+    id: number; 
+    name: string; 
+    network: string; 
+    leads: number; 
+    sales: number; 
+    revenue: number; 
+    capLeads?: number | null; 
+    capRevenue?: number | null; 
 }
 
-const formatPrice = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(amount);
+interface DashboardClientProps {
+  data: DashboardData[]; 
+  topOffers: TopOffer[]; 
+  capOffers: TopOffer[];
+  totals: { 
+      spend: number; 
+      revenue: number; 
+      profit: number; 
+      roi: number; 
+      googleSpend: number; 
+      microsoftSpend: number; 
+      leads: number; 
+      sales: number; 
+      revShare: number; 
+  };
+  campaignName: string; 
+  campaignType: string;
+  // NIEUWE PROPS VOOR VALUTA
+  currencySymbol: string;
+  currentCurrency: string;
+}
 
-// --- NIEUW COMPONENT: Custom Date Filter Dropdown ---
+// --- Datum Filter Dropdown ---
 function DateFilter({ value, onChange }: { value: string, onChange: (val: string) => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -53,7 +78,6 @@ function DateFilter({ value, onChange }: { value: string, onChange: (val: string
   
     const currentLabel = options.find(o => o.value === value)?.label || 'This Month';
   
-    // Sluit dropdown als je ernaast klikt
     useEffect(() => {
       function handleClickOutside(event: MouseEvent) {
         if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -66,7 +90,6 @@ function DateFilter({ value, onChange }: { value: string, onChange: (val: string
   
     return (
       <div className="relative" ref={containerRef}>
-          {/* TRIGGER BUTTON */}
           <button 
               onClick={() => setIsOpen(!isOpen)} 
               className="flex items-center gap-3 bg-neutral-900 border border-neutral-800 text-neutral-200 hover:text-white px-3 py-2 rounded-lg transition-all text-sm font-medium min-w-[160px] justify-between group shadow-sm hover:bg-neutral-800"
@@ -78,7 +101,6 @@ function DateFilter({ value, onChange }: { value: string, onChange: (val: string
               <ChevronDown size={14} className={`text-neutral-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
   
-          {/* DROPDOWN MENU */}
           {isOpen && (
               <div className="absolute top-full right-0 mt-2 w-48 bg-neutral-900 border border-neutral-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100 p-1.5">
                   {options.map((opt) => (
@@ -95,9 +117,13 @@ function DateFilter({ value, onChange }: { value: string, onChange: (val: string
           )}
       </div>
     );
-  }
+}
 
-export default function DashboardClient({ data, topOffers, capOffers, totals, campaignName, campaignType }: DashboardClientProps) {
+export default function DashboardClient({ 
+    data, topOffers, capOffers, totals, campaignName, campaignType,
+    currencySymbol, currentCurrency 
+}: DashboardClientProps) {
+  
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentFilter = searchParams.get('range') || 'this_month';
@@ -106,14 +132,36 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
   const [startDate, endDate] = dateRange;
   const [chartType, setChartType] = useState<'line' | 'heatmap'>('line');
 
+  // Helper voor het formatteren van prijzen op basis van de gekozen valuta
+  const formatMoney = (amount: number) => {
+      return new Intl.NumberFormat('en-US', { 
+          style: 'currency', 
+          currency: currentCurrency, 
+          minimumFractionDigits: 2 
+      }).format(amount);
+  };
+
   const handleFilterChange = (range: string) => {
     const params = new URLSearchParams(searchParams);
     params.set('range', range);
     if (range !== 'custom') { params.delete('from'); params.delete('to'); }
-    router.push(`/?${params.toString()}`);
+    router.replace(`/?${params.toString()}`, { scroll: false });
   };
 
-  const handleIntervalChange = (newInterval: string) => { const params = new URLSearchParams(searchParams); params.set('interval', newInterval); router.push(`/?${params.toString()}`); };
+  const handleIntervalChange = (newInterval: string) => { 
+      const params = new URLSearchParams(searchParams); 
+      params.set('interval', newInterval); 
+      router.replace(`/?${params.toString()}`, { scroll: false }); 
+  };
+  
+  // Toggle Valuta Functie
+  const toggleCurrency = () => {
+      const params = new URLSearchParams(searchParams);
+      const newCurrency = currentCurrency === 'USD' ? 'EUR' : 'USD';
+      params.set('currency', newCurrency);
+      router.replace(`/?${params.toString()}`, { scroll: false });
+  };
+
   const toLocalYMD = (date: Date) => { const year = date.getFullYear(); const month = String(date.getMonth() + 1).padStart(2, '0'); const day = String(date.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; };
   const handleCustomDateApply = () => { if (!startDate || !endDate) return; const params = new URLSearchParams(searchParams); params.set('range', 'custom'); params.set('from', toLocalYMD(startDate)); params.set('to', toLocalYMD(endDate)); router.push(`/?${params.toString()}`); };
   const getPercent = (part: number, total: number) => total === 0 ? '0' : ((part / total) * 100).toFixed(0);
@@ -130,8 +178,23 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
         </div>
       }
       actions={
-        // HIER GEBRUIKEN WE NU HET NIEUWE COMPONENT
-        <DateFilter value={currentFilter} onChange={handleFilterChange} />
+        <div className="flex items-center gap-3">
+            {/* VALUTA TOGGLE */}
+            <button 
+                onClick={toggleCurrency}
+                className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition shadow-sm h-[38px]"
+                title="Wissel Valuta"
+            >
+                <span className={currentCurrency === 'EUR' ? 'text-white font-bold' : 'text-neutral-500'}>€</span>
+                <div className="w-8 h-4 bg-neutral-800 rounded-full relative border border-neutral-700">
+                    <div className={`absolute top-0.5 w-2.5 h-2.5 rounded-full bg-blue-500 transition-all shadow-sm ${currentCurrency === 'USD' ? 'left-[18px]' : 'left-0.5'}`}></div>
+                </div>
+                <span className={currentCurrency === 'USD' ? 'text-white font-bold' : 'text-neutral-500'}>$</span>
+            </button>
+
+            {/* DATE FILTER */}
+            <DateFilter value={currentFilter} onChange={handleFilterChange} />
+        </div>
       }
     >
       {/* 1. Custom Date Picker */}
@@ -154,8 +217,8 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
             <>
                 <StatsCard title="Total Leads" value={totals.leads.toString()} trend="neutral" />
                 <StatsCard title="Total Sales" value={totals.sales.toString()} trend="positive" />
-                <StatsCard title="RevShare" value={formatPrice(totals.revShare)} trend="neutral" />
-                <StatsCard title="Total Revenue" value={formatPrice(totals.revenue)} trend="positive" />
+                <StatsCard title="RevShare" value={formatMoney(totals.revShare)} trend="neutral" />
+                <StatsCard title="Total Revenue" value={formatMoney(totals.revenue)} trend="positive" />
             </>
         ) : (
             <>
@@ -170,14 +233,14 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
                                     <div>
                                         <div className="flex justify-between text-xs mb-1">
                                             <span className="text-blue-400">Google</span>
-                                            <span className="text-neutral-300">{formatPrice(totals.googleSpend)}</span>
+                                            <span className="text-neutral-300">{formatMoney(totals.googleSpend)}</span>
                                         </div>
                                         <div className="w-full bg-neutral-800 rounded-full h-1"><div className="bg-blue-500 h-1 rounded-full" style={{ width: `${getPercent(totals.googleSpend, totals.spend)}%` }}></div></div>
                                     </div>
                                     <div>
                                         <div className="flex justify-between text-xs mb-1">
                                             <span className="text-cyan-400">Microsoft</span>
-                                            <span className="text-neutral-300">{formatPrice(totals.microsoftSpend)}</span>
+                                            <span className="text-neutral-300">{formatMoney(totals.microsoftSpend)}</span>
                                         </div>
                                         <div className="w-full bg-neutral-800 rounded-full h-1"><div className="bg-cyan-400 h-1 rounded-full" style={{ width: `${getPercent(totals.microsoftSpend, totals.spend)}%` }}></div></div>
                                     </div>
@@ -185,11 +248,11 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
                             </div>
                         </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-neutral-100">{formatPrice(totals.spend)}</h3>
+                    <h3 className="text-2xl font-bold text-neutral-100">{formatMoney(totals.spend)}</h3>
                 </div>
 
-                <StatsCard title="Total Revenue" value={formatPrice(totals.revenue)} trend="positive" />
-                <StatsCard title="Net Profit" value={formatPrice(totals.profit)} trend={totals.profit >= 0 ? 'positive' : 'negative'} />
+                <StatsCard title="Total Revenue" value={formatMoney(totals.revenue)} trend="positive" />
+                <StatsCard title="Net Profit" value={formatMoney(totals.profit)} trend={totals.profit >= 0 ? 'positive' : 'negative'} />
                 <StatsCard title="ROI" value={`${totals.roi.toFixed(1)}%`} trend={totals.roi >= 0 ? 'positive' : 'negative'} />
             </>
         )}
@@ -226,12 +289,12 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
                                 tick={{fill: '#737373', fontSize: 12}} 
                                 tickFormatter={(val) => { const d = new Date(val); if (currentInterval === 'month') return d.toLocaleDateString('nl-NL', { month: 'short', year: '2-digit' }); return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'numeric' }); }} 
                             />
-                            <YAxis yAxisId="left" stroke="#525252" tick={{fill: '#737373', fontSize: 12}} />
+                            <YAxis yAxisId="left" stroke="#525252" tick={{fill: '#737373', fontSize: 12}} tickFormatter={(val) => `${currencySymbol}${val}`} />
                             <YAxis yAxisId="right" orientation="right" stroke="#525252" unit={campaignType === 'SEO' ? '' : '%'} tick={{fill: '#737373', fontSize: 12}} />
                             <Tooltip 
                                 contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', color: '#f5f5f5', borderRadius: '8px' }} 
                                 labelFormatter={(label) => new Date(label).toLocaleDateString('nl-NL')}
-                                formatter={(value, name) => [(name === 'Revenue' || name === 'Costs') ? formatPrice(value as number) : value, name]}
+                                formatter={(value, name) => [(name === 'Revenue' || name === 'Costs') ? formatMoney(value as number) : value, name]}
                             />
                             <Legend />
                             {campaignType === 'SEO' ? (
@@ -249,7 +312,7 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
                             )}
                             </ComposedChart>
                         </ResponsiveContainer>
-                    ) : <Heatmap data={data} />
+                    ) : <Heatmap data={data} currencySymbol={currencySymbol} />
                 ) : <div className="h-full flex items-center justify-center text-neutral-500">Geen data beschikbaar.</div>}
             </div>
          </div>
@@ -257,7 +320,7 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
          <div className="lg:col-span-1 bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 flex flex-col overflow-hidden">
             <h3 className="text-lg font-semibold text-neutral-200 mb-4">Offer Performance</h3>
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                <div className="mb-8"><CapMonitor offers={capOffers} /></div>
+                <div className="mb-8"><CapMonitor offers={capOffers} formatMoney={formatMoney} /></div>
                 <div>
                     <h4 className="text-xs font-bold text-neutral-500 uppercase mb-3">Toplijst</h4>
                     <div className="space-y-2">
@@ -268,7 +331,7 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
                                         <span className={`flex items-center justify-center w-6 h-6 rounded text-xs font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' : index === 1 ? 'bg-neutral-500/20 text-neutral-400' : index === 2 ? 'bg-orange-500/20 text-orange-500' : 'text-neutral-600'}`}>{index + 1}</span>
                                         <div><p className="text-sm font-medium text-neutral-200 truncate max-w-[120px] group-hover:text-blue-400 transition-colors">{offer.name}</p><p className="text-xs text-neutral-500">{offer.leads} Leads</p></div>
                                     </div>
-                                    <div className="text-right"><p className="text-sm font-bold text-neutral-100">{formatPrice(offer.revenue)}</p></div>
+                                    <div className="text-right"><p className="text-sm font-bold text-neutral-100">{formatMoney(offer.revenue)}</p></div>
                                 </div>
                             </Link>
                         ))}
@@ -281,7 +344,8 @@ export default function DashboardClient({ data, topOffers, capOffers, totals, ca
   );
 }
 
-// ... Hulpfuncties StatsCard, CapMonitor en Heatmap blijven ongewijzigd ...
+// --- HULPCOMPONENTEN ---
+
 function StatsCard({ title, value, trend }: { title: string, value: string, trend?: 'positive' | 'negative' | 'neutral' }) {
     return (
         <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-xl shadow-sm hover:border-neutral-700 transition-colors flex flex-col justify-between h-full">
@@ -299,7 +363,7 @@ function StatsCard({ title, value, trend }: { title: string, value: string, tren
     );
 }
 
-function CapMonitor({ offers }: { offers: TopOffer[] }) {
+function CapMonitor({ offers, formatMoney }: { offers: TopOffer[], formatMoney: (val: number) => string }) {
     if (!offers || offers.length === 0) return null;
     return (
       <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 shadow-inner">
@@ -310,8 +374,18 @@ function CapMonitor({ offers }: { offers: TopOffer[] }) {
         <div className="flex flex-col gap-4">
           {offers.map(offer => {
             let percent = 0; let current = 0; let max = 0; let label = '';
-            if (offer.capLeads) { current = offer.leads; max = offer.capLeads; percent = (current / max) * 100; label = `${current} / ${max} Leads`; } 
-            else if (offer.capRevenue) { current = offer.revenue; max = offer.capRevenue; percent = (current / max) * 100; label = `${formatPrice(current)} / ${formatPrice(max)}`; }
+            if (offer.capLeads) { 
+                current = offer.leads; 
+                max = offer.capLeads; 
+                percent = (current / max) * 100; 
+                label = `${current} / ${max} Leads`; 
+            } 
+            else if (offer.capRevenue) { 
+                current = offer.revenue; 
+                max = offer.capRevenue; 
+                percent = (current / max) * 100; 
+                label = `${formatMoney(current)} / ${formatMoney(max)}`; 
+            }
             let barColor = 'bg-blue-600'; let textColor = 'text-blue-400';
             if (percent >= 100) { barColor = 'bg-red-500'; textColor = 'text-red-400'; } else if (percent >= 85) { barColor = 'bg-orange-500'; textColor = 'text-orange-400'; }
             return (
@@ -327,7 +401,7 @@ function CapMonitor({ offers }: { offers: TopOffer[] }) {
     );
 }
 
-function Heatmap({ data }: { data: DashboardData[] }) {
+function Heatmap({ data, currencySymbol }: { data: DashboardData[], currencySymbol: string }) {
     if (!data || data.length === 0) return <div className="text-neutral-500">Geen data</div>;
     const maxProfit = Math.max(...data.map(d => d.profit)); const minProfit = Math.min(...data.map(d => d.profit));
     const formatDate = (dateStr: string) => { const d = new Date(dateStr); return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', weekday: 'short' }); };
@@ -346,7 +420,7 @@ function Heatmap({ data }: { data: DashboardData[] }) {
             return (
               <div key={day.date} className="group relative">
                 <div className="w-full aspect-square rounded-md border flex items-center justify-center transition hover:scale-105 cursor-pointer" style={{ backgroundColor: bgColor, borderColor: borderColor }}><span className="text-[10px] font-medium text-white/80 drop-shadow-md">{new Date(day.date).getDate()}</span></div>
-                <div className={`absolute left-1/2 -translate-x-1/2 w-32 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-neutral-200 opacity-0 group-hover:opacity-100 pointer-events-none transition z-50 shadow-xl ${tooltipPosition}`}><p className="font-bold text-center border-b border-neutral-800 pb-1 mb-1">{formatDate(day.date)}</p><div className="flex justify-between"><span>Winst:</span><span className={day.profit >= 0 ? "text-green-400" : "text-red-400"}>${day.profit.toFixed(0)}</span></div><div className="flex justify-between text-neutral-500"><span>ROI:</span><span>{day.roi.toFixed(0)}%</span></div></div>
+                <div className={`absolute left-1/2 -translate-x-1/2 w-32 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-neutral-200 opacity-0 group-hover:opacity-100 pointer-events-none transition z-50 shadow-xl ${tooltipPosition}`}><p className="font-bold text-center border-b border-neutral-800 pb-1 mb-1">{formatDate(day.date)}</p><div className="flex justify-between"><span>Winst:</span><span className={day.profit >= 0 ? "text-green-400" : "text-red-400"}>{currencySymbol}{day.profit.toFixed(0)}</span></div><div className="flex justify-between text-neutral-500"><span>ROI:</span><span>{day.roi.toFixed(0)}%</span></div></div>
               </div>
             );
           })}

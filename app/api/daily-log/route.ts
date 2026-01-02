@@ -1,9 +1,7 @@
-// app/api/daily-log/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { startOfDay, endOfDay } from 'date-fns';
 
-// 1. GET: Haal data op voor een specifieke datum
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const dateStr = searchParams.get('date');
@@ -16,37 +14,35 @@ export async function GET(req: Request) {
   const date = new Date(dateStr);
   const campaignId = parseInt(campaignIdStr);
 
-  // Zoekbereik: De hele dag (00:00 tot 23:59)
   const range = {
     gte: startOfDay(date),
     lte: endOfDay(date)
   };
 
   try {
-    // A. Haal Spend op
     const spends = await prisma.dailySpend.findMany({
-      where: {
-        campaignId: campaignId,
-        date: range
-      }
+      where: { campaignId, date: range }
     });
 
-    // B. Haal Conversies op
     const conversions = await prisma.conversion.findMany({
-      where: {
-        offer: { campaignId: campaignId }, // Alleen offers van deze campagne
-        date: range
-      }
+      where: { offer: { campaignId }, date: range }
     });
 
-    // C. Format data voor de frontend
-    // We maken er een makkelijk object van: { google: "10", microsoft: "5" }
-    const spendData = {
-      google: spends.find(s => s.platform.toLowerCase().includes('google'))?.amount || '',
-      microsoft: spends.find(s => s.platform.toLowerCase().includes('microsoft'))?.amount || ''
+    // C. Format data - NU MET CURRENCY INFO
+    const getPlatformData = (name: string) => {
+        const item = spends.find(s => s.platform.toLowerCase().includes(name));
+        if (!item) return null;
+        return {
+            amount: item.amount,
+            currency: item.currency || 'USD' // Default fallback
+        };
     };
 
-    // Conversies omzetten naar een map: { [offerId]: { leads: 5, sales: 1 } }
+    const spendData = {
+      google: getPlatformData('google'),
+      microsoft: getPlatformData('microsoft')
+    };
+
     const conversionData: Record<number, { leads: number, sales: number }> = {};
     conversions.forEach(c => {
       conversionData[c.offerId] = { leads: c.leads, sales: c.sales };
@@ -68,7 +64,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { type, date, campaignId, data } = body;
 
-    // 1. Log opslaan (Als string voor SQLite compatibiliteit)
+    // 1. Log opslaan
     const log = await prisma.dailyLog.create({
       data: {
         type,
@@ -78,17 +74,22 @@ export async function POST(req: Request) {
       }
     });
 
-    // 2. Data verwerken in de statistieken tabellen
+    // 2. Data verwerken
     if (type === 'spend') {
-      const google = parseFloat(data.google || 0);
-      const microsoft = parseFloat(data.microsoft || 0);
+      // Data structuur is nu: { google: { amount: "10", currency: "EUR", exchangeRate: 1.05 } }
+      const googleData = data.google;
+      const microsoftData = data.microsoft;
 
-      // Hier gebruikten we al een slimme 'upsert' functie, dus dit ging al goed
-      if (google > 0) await upsertSpend(date, campaignId, 'Google Ads', google);
-      if (microsoft > 0) await upsertSpend(date, campaignId, 'Microsoft Ads', microsoft);
+      if (googleData && parseFloat(googleData.amount) > 0) {
+          await upsertSpend(date, campaignId, 'Google Ads', parseFloat(googleData.amount), googleData.currency, googleData.exchangeRate);
+      }
+      
+      if (microsoftData && parseFloat(microsoftData.amount) > 0) {
+          await upsertSpend(date, campaignId, 'Microsoft Ads', parseFloat(microsoftData.amount), microsoftData.currency, microsoftData.exchangeRate);
+      }
     } 
     else if (type === 'conversions') {
-      // data is hier een array: [{ offerId: 1, leads: 5 }, ...]
+      // ... Conversie logica blijft ongewijzigd ...
       for (const item of data) {
         if (item.offerId) {
             const targetDate = new Date(date);
@@ -96,36 +97,17 @@ export async function POST(req: Request) {
             const leads = parseInt(item.leads || 0);
             const sales = parseInt(item.sales || 0);
 
-            // STAP A: Zoek of er al een record is
-            const existingConversion = await prisma.conversion.findFirst({
+            // Using Upsert (Native Prisma) is cleaner here too
+            await prisma.conversion.upsert({
                 where: {
-                    offerId: offerId,
-                    date: targetDate
-                }
-            });
-
-            if (existingConversion) {
-                // STAP B: UPDATE (Bestaat al? Overschrijf de aantallen)
-                await prisma.conversion.update({
-                    where: { id: existingConversion.id },
-                    data: {
-                        leads: leads,
-                        sales: sales
+                    date_offerId: {
+                        offerId: offerId,
+                        date: targetDate
                     }
-                });
-            } else {
-                // STAP C: CREATE (Bestaat nog niet? Maak nieuw)
-                if (leads > 0 || sales > 0) {
-                    await prisma.conversion.create({
-                        data: {
-                            date: targetDate,
-                            offerId: offerId,
-                            leads: leads,
-                            sales: sales
-                        }
-                    });
-                }
-            }
+                },
+                update: { leads, sales },
+                create: { date: targetDate, offerId, leads, sales }
+            });
         }
       }
     }
@@ -137,23 +119,32 @@ export async function POST(req: Request) {
   }
 }
 
-// Hulpfunctie om spend te updaten/maken (deze was al goed)
-async function upsertSpend(dateStr: string, campaignId: any, platform: string, amount: number) {
+// Hulpfunctie om spend te upserten MET VALUTA
+async function upsertSpend(dateStr: string, campaignId: any, platform: string, amount: number, currency: string, exchangeRate: number) {
   const date = new Date(dateStr);
   const cId = parseInt(campaignId);
 
-  const existing = await prisma.dailySpend.findFirst({
-    where: { date: date, campaignId: cId, platform: platform }
+  // Gebruik de unieke constraint van je schema (date + platform + campaignId)
+  await prisma.dailySpend.upsert({
+    where: {
+        date_platform_campaign: {
+            date: date,
+            campaignId: cId,
+            platform: platform
+        }
+    },
+    update: {
+        amount: amount,
+        currency: currency || 'USD',
+        exchangeRate: exchangeRate || 1.0
+    },
+    create: {
+        date: date,
+        campaignId: cId,
+        platform: platform,
+        amount: amount,
+        currency: currency || 'USD',
+        exchangeRate: exchangeRate || 1.0
+    }
   });
-
-  if (existing) {
-    await prisma.dailySpend.update({
-      where: { id: existing.id },
-      data: { amount: amount }
-    });
-  } else {
-    await prisma.dailySpend.create({
-      data: { date: date, campaignId: cId, platform: platform, amount: amount }
-    });
-  }
 }

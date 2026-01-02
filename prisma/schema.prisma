@@ -65,6 +65,8 @@ model Adjustment {
   currency      String   @default("USD")
   description   String?
   type          String
+  // AANPASSINGEN:
+  exchangeRate  Float    @default(1.0)   // <--- NIEUW: Omrekenfactor naar USD
 
   // CORRECTIE: Netwerk optioneel gemaakt (Int?), want finance tool gebruikt dit niet altijd
   networkId     Int?

@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db';
 import DashboardClient from '@/components/DashboardClient';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import { getSession } from '@/lib/auth'; // <--- Vergeet deze niet
+import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { 
   startOfMonth, endOfMonth, subMonths, 
@@ -13,6 +13,9 @@ import {
 } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
+
+// CONFIGURATIE: Wisselkoers voor weergave
+const EUR_USD_RATE = 1.05; // 1 Euro = 1.05 Dollar
 
 function getEndOfDay(date: Date) { return dateFnsEndOfDay(date); }
 
@@ -42,20 +45,36 @@ export default async function Page({
   const cookieStore = await cookies();
   const session: any = await getSession();
 
-  // Als er geen sessie is, laat de middleware het werk doen, maar voor de zekerheid:
   if (!session) redirect('/login');
 
-  // 1. BEPAAL TOT WELKE PROJECTEN DEZE USER TOEGANG HEEFT
+  // 1. BEPAAL VALUTA WEERGAVE
+  // Kijkt naar ?currency=EUR in de URL, anders standaard USD
+  const displayCurrency = params.currency === 'EUR' ? 'EUR' : 'USD';
+  const currencySymbol = displayCurrency === 'EUR' ? '€' : '$';
+
+  // HULPFUNCTIE: Converteer bedragen
+  const convert = (amount: number, itemCurrency: string, itemRate: number) => {
+    // Stap 1: Alles omrekenen naar USD (Onze basis)
+    // Als item EUR is (rate 1.05), dan is 100 EUR -> 105 USD.
+    // Bij USD is de rate genegeerd of 1.0
+    const amountInUSD = itemCurrency === 'EUR' ? amount * itemRate : amount;
+
+    // Stap 2: Van USD naar de gewenste Weergave Valuta
+    if (displayCurrency === 'USD') return amountInUSD;
+    if (displayCurrency === 'EUR') return amountInUSD / EUR_USD_RATE;
+    
+    return amountInUSD;
+  };
+
+  // 2. BEPAAL PROJECT TOEGANG (Ongewijzigd)
   let allowedCampaigns: { id: number; name: string }[] = [];
 
   if (session.role === 'SUPER_ADMIN') {
-      // Admin ziet alles
       allowedCampaigns = await prisma.campaign.findMany({ 
           select: { id: true, name: true },
           orderBy: { id: 'asc' }
       });
   } else {
-      // User ziet alleen eigen projecten
       allowedCampaigns = await prisma.campaign.findMany({ 
           where: {
             members: { some: { userId: session.userId } }
@@ -65,7 +84,6 @@ export default async function Page({
       });
   }
 
-  // SCENARIO: Helemaal geen toegang tot projecten
   if (allowedCampaigns.length === 0) {
       return (
           <div className="flex flex-col items-center justify-center h-[80vh] text-center p-4">
@@ -80,9 +98,8 @@ export default async function Page({
       );
   }
 
-  // 2. BEPAAL HET GEWENSTE ID (Uit URL of Cookie)
+  // 3. BEPAAL HET GEWENSTE ID
   let requestedId = 0;
-  
   if (params.campaignId) {
       requestedId = parseInt(params.campaignId);
   } else {
@@ -90,15 +107,10 @@ export default async function Page({
       if (cookieId) requestedId = parseInt(cookieId);
   }
 
-  // 3. STRICT CHECK: MAG DEZE USER DIT ID ZIEN?
-  // We zoeken of het requestedId voorkomt in de lijst met toegestane projecten.
   const hasAccess = allowedCampaigns.find(c => c.id === requestedId);
-
-  // Zo niet (of als er geen ID was)? Pak dan de EERSTE uit de toegestane lijst.
-  // Dit lost het probleem op van de user die Project 1 zag terwijl hij dat niet mocht.
   const campaignId = hasAccess ? requestedId : allowedCampaigns[0].id;
 
-  // --- VANAF HIER LADEN WE DE DATA VOOR HET DEFINITIEVE ID ---
+  // --- DATA OPHALEN ---
 
   const { range, from, to, interval } = params;
   const { start, end } = getDateRange(range || 'this_month', from, to);
@@ -124,7 +136,8 @@ export default async function Page({
 
   if (!campaign) return <div className="p-10 text-white">Geen data geladen.</div>;
 
-  // ... BEREKENINGEN (Precies zoals voorheen) ...
+  // --- BEREKENINGEN (Aangepast met convert functie) ---
+
   let totalSpend = 0;
   let googleSpend = 0;
   let microsoftSpend = 0;
@@ -132,30 +145,40 @@ export default async function Page({
   let totalLeads = 0;
   let totalSales = 0;
   let totalRevShare = 0; 
+  let totalRevenue = 0; // Deze initialiseren we nu hier
 
   const chartMap = new Map<string, { spend: number, revenue: number, leads: number, sales: number }>();
 
+  // 1. Verwerk SPEND
   campaign.dailySpends.forEach(spend => {
-    const amountUSD = spend.currency === 'EUR' ? spend.amount * spend.exchangeRate : spend.amount;
-    totalSpend += amountUSD;
+    // AANGEPAST: Gebruik convert()
+    const value = convert(spend.amount, spend.currency, spend.exchangeRate);
+    
+    totalSpend += value;
     const p = spend.platform.toLowerCase();
-    if (p.includes('google')) googleSpend += amountUSD;
-    if (p.includes('microsoft') || p.includes('bing')) microsoftSpend += amountUSD;
+    if (p.includes('google')) googleSpend += value;
+    if (p.includes('microsoft') || p.includes('bing')) microsoftSpend += value;
 
     const key = getGroupKey(spend.date, currentInterval);
     const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
-    chartMap.set(key, { ...current, spend: current.spend + amountUSD });
+    chartMap.set(key, { ...current, spend: current.spend + value });
   });
 
-  let totalRevenue = 0;
   
+  // 2. Verwerk OFFERS
   const processedTopOffers = campaign.offers.map(offer => {
     let offerRevenue = 0;
+    
+    // AANGEPAST: Reken payouts om naar de weergave valuta
+    // We gaan ervan uit dat offer payouts in de DB in USD staan (rate 1.0)
+    const payoutLeadConv = convert(offer.payoutLead, 'USD', 1.0);
+    const payoutSaleConv = convert(offer.payoutSale, 'USD', 1.0);
+
     let leads = 0;
     let sales = 0;
 
     offer.conversions.forEach(conv => {
-      const rev = (conv.leads * offer.payoutLead) + (conv.sales * offer.payoutSale);
+      const rev = (conv.leads * payoutLeadConv) + (conv.sales * payoutSaleConv);
       offerRevenue += rev;
       leads += conv.leads;
       sales += conv.sales;
@@ -186,13 +209,17 @@ export default async function Page({
 
   totalRevenue = processedTopOffers.reduce((acc, curr) => acc + curr.revenue, 0);
 
+  // 3. Verwerk ADJUSTMENTS / REVSHARE
   campaign.adjustments.forEach(adj => {
-    totalRevenue += adj.amount;
-    totalRevShare += adj.amount;
+    // AANGEPAST: Gebruik convert() voor de juiste valuta
+    const value = convert(adj.amount, adj.currency, adj.exchangeRate);
+
+    totalRevenue += value;
+    totalRevShare += value;
     
     const key = getGroupKey(adj.date, currentInterval);
     const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
-    chartMap.set(key, { ...current, revenue: current.revenue + adj.amount });
+    chartMap.set(key, { ...current, revenue: current.revenue + value });
   });
 
   const profit = totalRevenue - totalSpend;
@@ -228,12 +255,23 @@ export default async function Page({
   });
 
   const capOffers = rawCapOffers.map(offer => {
+    // Voor caps (limieten) hoeven we meestal niet om te rekenen voor het percentage, 
+    // maar voor de revenue weergave wel.
+    const payoutLeadConv = convert(offer.payoutLead, 'USD', 1.0);
+    const payoutSaleConv = convert(offer.payoutSale, 'USD', 1.0);
+
     let currentRevenue = 0;
     let currentLeads = 0;
     offer.conversions.forEach(conv => {
-      currentRevenue += (conv.leads * offer.payoutLead) + (conv.sales * offer.payoutSale);
+      currentRevenue += (conv.leads * payoutLeadConv) + (conv.sales * payoutSaleConv);
       currentLeads += conv.leads;
     });
+
+    // Cap revenue is vaak in USD ingesteld in de DB. Als we die willen vergelijken
+    // met de geconverteerde revenue, moeten we de cap misschien ook converteren voor weergave.
+    // Voor nu converteren we de cap ook naar de display currency voor consistentie.
+    const capRevenueConv = offer.capRevenue ? convert(offer.capRevenue, 'USD', 1.0) : null;
+
     return {
       id: offer.id,
       name: offer.name,
@@ -242,7 +280,7 @@ export default async function Page({
       sales: 0, 
       revenue: currentRevenue,
       capLeads: offer.capLeads,
-      capRevenue: offer.capRevenue
+      capRevenue: capRevenueConv
     };
   }).sort((a, b) => {
     const getPercent = (o: any) => {
@@ -264,6 +302,9 @@ export default async function Page({
       }}
       campaignName={campaign.name}
       campaignType={campaign.type || 'PAID'} 
+      // AANGEPAST: Geef valuta info door aan client
+      currencySymbol={currencySymbol}
+      currentCurrency={displayCurrency}
     />
   );
 }

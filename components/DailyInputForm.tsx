@@ -7,28 +7,36 @@ import PageContainer from './PageContainer';
 interface Offer { id: number; name: string; network: { name: string } | null; campaignId: number | null; }
 interface DailyInputFormProps { campaignId: number; campaignName: string; }
 
+// Configuratie wisselkoers
+const EUR_TO_USD_RATE = 1.17;
+
 export default function DailyInputForm({ campaignId, campaignName }: DailyInputFormProps) {
   const [activeTab, setActiveTab] = useState<'spend' | 'conversions'>('spend');
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false); // Nieuwe state voor laden data
+  const [fetching, setFetching] = useState(false);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   
+  // SPEND STATES (Nu met Currency)
   const [googleSpend, setGoogleSpend] = useState('');
+  const [googleCurrency, setGoogleCurrency] = useState('EUR'); // Default op Euro
+
   const [microsoftSpend, setMicrosoftSpend] = useState('');
+  const [microsoftCurrency, setMicrosoftCurrency] = useState('EUR'); // Default op Euro
   
   const [offers, setOffers] = useState<Offer[]>([]);
   const [convData, setConvData] = useState<Record<number, { leads: string, sales: string }>>({});
 
-  // 1. Haal Offers op (eenmalig)
+  // 1. Haal Offers op
   useEffect(() => { fetch('/api/offers').then(res => res.json()).then(setOffers); }, []);
 
-  // 2. NIEUW: Haal bestaande data op wanneer Datum of Project verandert
+  // 2. Haal bestaande data op
   useEffect(() => {
     const fetchDayData = async () => {
         setFetching(true);
-        // Reset velden eerst (zodat je niet oude data ziet als er niks is)
         setGoogleSpend('');
+        setGoogleCurrency('EUR'); // Reset naar default
         setMicrosoftSpend('');
+        setMicrosoftCurrency('EUR'); // Reset naar default
         setConvData({});
 
         try {
@@ -36,17 +44,21 @@ export default function DailyInputForm({ campaignId, campaignName }: DailyInputF
             if (res.ok) {
                 const data = await res.json();
                 
-                // Vul Spend in
+                // Vul Spend en Valuta in (als die bestaan)
                 if (data.spend) {
-                    setGoogleSpend(data.spend.google.toString());
-                    setMicrosoftSpend(data.spend.microsoft.toString());
+                    if (data.spend.google) {
+                        setGoogleSpend(data.spend.google.amount.toString());
+                        setGoogleCurrency(data.spend.google.currency || 'USD');
+                    }
+                    if (data.spend.microsoft) {
+                        setMicrosoftSpend(data.spend.microsoft.amount.toString());
+                        setMicrosoftCurrency(data.spend.microsoft.currency || 'USD');
+                    }
                 }
 
                 // Vul Conversies in
                 if (data.conversions) {
                     const mappedConvs: Record<number, { leads: string, sales: string }> = {};
-                    // De API geeft { [offerId]: { leads: 5, sales: 0 } }
-                    // Wij maken er strings van voor de inputs
                     Object.entries(data.conversions).forEach(([offerId, val]: [string, any]) => {
                         mappedConvs[parseInt(offerId)] = { 
                             leads: val.leads.toString(), 
@@ -64,15 +76,36 @@ export default function DailyInputForm({ campaignId, campaignName }: DailyInputF
     };
 
     fetchDayData();
-  }, [date, campaignId]); // Trigger als datum of id verandert
+  }, [date, campaignId]);
 
   const filteredOffers = offers.filter(o => o.campaignId === campaignId);
 
   const handleSave = async () => {
     setLoading(true);
     let payload = {};
+
     if (activeTab === 'spend') {
-      payload = { type: 'spend', date, campaignId, data: { google: googleSpend, microsoft: microsoftSpend } };
+      // Bereken koersen
+      const googleRate = googleCurrency === 'EUR' ? EUR_TO_USD_RATE : 1.0;
+      const microsoftRate = microsoftCurrency === 'EUR' ? EUR_TO_USD_RATE : 1.0;
+
+      payload = { 
+          type: 'spend', 
+          date, 
+          campaignId, 
+          data: { 
+              google: { 
+                  amount: googleSpend, 
+                  currency: googleCurrency, 
+                  exchangeRate: googleRate 
+              }, 
+              microsoft: { 
+                  amount: microsoftSpend, 
+                  currency: microsoftCurrency, 
+                  exchangeRate: microsoftRate 
+              } 
+          } 
+      };
     } else {
       const conversionsList = filteredOffers.map(offer => ({
         offerId: offer.id,
@@ -86,7 +119,6 @@ export default function DailyInputForm({ campaignId, campaignName }: DailyInputF
       const res = await fetch('/api/daily-log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (res.ok) {
         toast.success('Opgeslagen!');
-        // We hoeven niet meer te resetten, want de data IS nu wat er in de database staat
       } else { toast.error('Er ging iets mis.'); }
     } catch (e) { toast.error('Er ging iets mis.'); } finally { setLoading(false); }
   };
@@ -95,6 +127,7 @@ export default function DailyInputForm({ campaignId, campaignName }: DailyInputF
 
   const tabClass = (tab: string) => `flex-1 py-3 text-sm font-medium text-center cursor-pointer border-b-2 transition-colors ${activeTab === tab ? 'border-neutral-100 text-neutral-100 bg-neutral-900' : 'border-transparent text-neutral-500 hover:text-neutral-300 hover:bg-neutral-900/50'}`;
   const inputClass = "w-full bg-neutral-950 border border-neutral-800 rounded-md px-3 py-2 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 placeholder:text-neutral-700 transition-colors";
+  const selectClass = "bg-neutral-950 border border-neutral-800 rounded-md px-2 py-2 text-sm text-white focus:border-neutral-600 outline-none w-[70px]";
 
   return (
     <PageContainer title="Daily Input" subtitle={`Handmatige invoer voor ${campaignName}`}>
@@ -126,24 +159,58 @@ export default function DailyInputForm({ campaignId, campaignName }: DailyInputF
                             {fetching && <span className="text-xs text-neutral-500 animate-pulse">Data laden...</span>}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            {/* GOOGLE INPUT */}
                             <div>
                                 <label className="text-xs text-neutral-500 font-medium uppercase mb-2 block">Google Spend</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2 text-neutral-600">$</span>
-                                    <input type="number" step="0.01" className={`${inputClass} pl-6`} value={googleSpend} onChange={e => setGoogleSpend(e.target.value)} placeholder="0.00" />
+                                <div className="flex gap-2">
+                                    <select 
+                                        value={googleCurrency} 
+                                        onChange={e => setGoogleCurrency(e.target.value)}
+                                        className={selectClass}
+                                    >
+                                        <option value="EUR">€</option>
+                                        <option value="USD">$</option>
+                                    </select>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        className={inputClass} 
+                                        value={googleSpend} 
+                                        onChange={e => setGoogleSpend(e.target.value)} 
+                                        placeholder="0.00" 
+                                    />
                                 </div>
                             </div>
+
+                            {/* MICROSOFT INPUT */}
                             <div>
                                 <label className="text-xs text-neutral-500 font-medium uppercase mb-2 block">Microsoft Spend</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2 text-neutral-600">$</span>
-                                    <input type="number" step="0.01" className={`${inputClass} pl-6`} value={microsoftSpend} onChange={e => setMicrosoftSpend(e.target.value)} placeholder="0.00" />
+                                <div className="flex gap-2">
+                                     <select 
+                                        value={microsoftCurrency} 
+                                        onChange={e => setMicrosoftCurrency(e.target.value)}
+                                        className={selectClass}
+                                    >
+                                        <option value="EUR">€</option>
+                                        <option value="USD">$</option>
+                                    </select>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        className={inputClass} 
+                                        value={microsoftSpend} 
+                                        onChange={e => setMicrosoftSpend(e.target.value)} 
+                                        placeholder="0.00" 
+                                    />
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 )}
 
+                {/* CONVERSIES TAB (Ongewijzigd) */}
                 {activeTab === 'conversions' && (
                     <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6">
                         <div className="flex justify-between items-center pb-4 border-b border-neutral-800 mb-4">

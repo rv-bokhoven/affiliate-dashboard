@@ -30,7 +30,6 @@ export async function GET(req: Request) {
         campaignId: campaignId,
         date: { gte: start, lte: end }
       },
-      // NIEUW: Laad de offer data mee (voor de naam in de lijst)
       include: {
         offer: { select: { name: true } }
       },
@@ -54,6 +53,10 @@ export async function POST(req: Request) {
     const campaignId = parseInt(body.campaignId);
     const offerId = body.offerId ? parseInt(body.offerId) : null;
     const dateObj = new Date(body.date);
+    
+    // Valuta & Koers ophalen (met defaults)
+    const currency = body.currency || 'USD';
+    const exchangeRate = body.exchangeRate || 1.0;
 
     // LOGICA VOOR OFFERS: CHECK OF ER AL IETS BESTAAT IN DEZE MAAND
     if (offerId) {
@@ -77,7 +80,9 @@ export async function POST(req: Request) {
                     amount: parseFloat(body.amount),
                     description: body.description,
                     type: body.type,
-                    date: dateObj // Update datum (bijv. als je later in de maand update)
+                    date: dateObj,
+                    currency,      // <--- Update valuta
+                    exchangeRate   // <--- Update koers
                 }
             });
             return NextResponse.json(updated);
@@ -92,7 +97,9 @@ export async function POST(req: Request) {
         type: body.type, 
         date: dateObj, 
         campaignId: campaignId,
-        offerId: offerId 
+        offerId: offerId,
+        currency,        // <--- Opslaan
+        exchangeRate     // <--- Opslaan
       }
     });
 
@@ -104,7 +111,6 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-    // ... (deze blijft ongewijzigd) ...
     const session: any = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   
