@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import DatePicker from "react-datepicker";
-import "react-datepicker.css"; // Let op: soms is het pad 'react-datepicker/dist/react-datepicker.css' afhankelijk van je setup
+import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import { nl } from 'date-fns/locale';
 import {

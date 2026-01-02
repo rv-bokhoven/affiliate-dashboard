@@ -15,7 +15,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 // CONFIGURATIE: Wisselkoers voor weergave
-const EUR_USD_RATE = 1.05; // 1 Euro = 1.05 Dollar
+const EUR_USD_RATE = 1.17; // 1 Euro = 1.05 Dollar
 
 function getEndOfDay(date: Date) { return dateFnsEndOfDay(date); }
 
