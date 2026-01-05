@@ -15,7 +15,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 // CONFIGURATIE: Wisselkoers voor weergave
-const EUR_USD_RATE = 1.17; // 1 Euro = 1.05 Dollar
+const EUR_USD_RATE = 1.17; 
 
 function getEndOfDay(date: Date) { return dateFnsEndOfDay(date); }
 
@@ -48,25 +48,18 @@ export default async function Page({
   if (!session) redirect('/login');
 
   // 1. BEPAAL VALUTA WEERGAVE
-  // Kijkt naar ?currency=EUR in de URL, anders standaard USD
   const displayCurrency = params.currency === 'EUR' ? 'EUR' : 'USD';
   const currencySymbol = displayCurrency === 'EUR' ? '€' : '$';
 
   // HULPFUNCTIE: Converteer bedragen
   const convert = (amount: number, itemCurrency: string, itemRate: number) => {
-    // Stap 1: Alles omrekenen naar USD (Onze basis)
-    // Als item EUR is (rate 1.05), dan is 100 EUR -> 105 USD.
-    // Bij USD is de rate genegeerd of 1.0
     const amountInUSD = itemCurrency === 'EUR' ? amount * itemRate : amount;
-
-    // Stap 2: Van USD naar de gewenste Weergave Valuta
     if (displayCurrency === 'USD') return amountInUSD;
     if (displayCurrency === 'EUR') return amountInUSD / EUR_USD_RATE;
-    
     return amountInUSD;
   };
 
-  // 2. BEPAAL PROJECT TOEGANG (Ongewijzigd)
+  // 2. BEPAAL PROJECT TOEGANG
   let allowedCampaigns: { id: number; name: string }[] = [];
 
   if (session.role === 'SUPER_ADMIN') {
@@ -89,11 +82,6 @@ export default async function Page({
           <div className="flex flex-col items-center justify-center h-[80vh] text-center p-4">
               <h1 className="text-2xl font-bold text-white mb-2">Welkom bij Affiliate Pro 🚀</h1>
               <p className="text-neutral-400 mb-6">Je bent nog niet gekoppeld aan een project.</p>
-              {session.role === 'SUPER_ADMIN' && (
-                  <Link href="/settings" className="bg-white text-black px-6 py-2 rounded font-medium hover:bg-neutral-200 transition">
-                      + Maak je eerste project aan
-                  </Link>
-              )}
           </div>
       );
   }
@@ -136,7 +124,7 @@ export default async function Page({
 
   if (!campaign) return <div className="p-10 text-white">Geen data geladen.</div>;
 
-  // --- BEREKENINGEN (Aangepast met convert functie) ---
+  // --- BEREKENINGEN ---
 
   let totalSpend = 0;
   let googleSpend = 0;
@@ -145,15 +133,13 @@ export default async function Page({
   let totalLeads = 0;
   let totalSales = 0;
   let totalRevShare = 0; 
-  let totalRevenue = 0; // Deze initialiseren we nu hier
+  let totalRevenue = 0; 
 
   const chartMap = new Map<string, { spend: number, revenue: number, leads: number, sales: number }>();
 
   // 1. Verwerk SPEND
   campaign.dailySpends.forEach(spend => {
-    // AANGEPAST: Gebruik convert()
     const value = convert(spend.amount, spend.currency, spend.exchangeRate);
-    
     totalSpend += value;
     const p = spend.platform.toLowerCase();
     if (p.includes('google')) googleSpend += value;
@@ -165,17 +151,15 @@ export default async function Page({
   });
 
   
-// 2. Verwerk OFFERS
+  // 2. Verwerk OFFERS
   const processedTopOffers = campaign.offers.map(offer => {
-    let offerRevenue = 0;
+    let offerConversionRevenue = 0; // Omzet uit leads/sales
+    let offerAdjustmentRevenue = 0; // Omzet uit RevShare voor dit offer
     
-    // NIEUWE LOGICA: Bepaal de koers van DIT offer
-    // Als het offer in EUR is, gebruiken we de vaste koers (1.17). Anders 1.0.
-    // (We halen de currency op uit de database, fallback is 'USD')
+    // A. Leads & Sales
     const offerCurrency = offer.currency || 'USD';
-    const offerRate = offerCurrency === 'EUR' ? 1.17 : 1.0;
+    const offerRate = offerCurrency === 'EUR' ? EUR_USD_RATE : 1.0;
 
-    // Reken de payout per lead/sale om naar de weergave valuta via convert()
     const payoutLeadConv = convert(offer.payoutLead, offerCurrency, offerRate);
     const payoutSaleConv = convert(offer.payoutSale, offerCurrency, offerRate);
 
@@ -183,12 +167,12 @@ export default async function Page({
     let sales = 0;
 
     offer.conversions.forEach(conv => {
-      // Nu gebruiken we de geconverteerde payouts
       const rev = (conv.leads * payoutLeadConv) + (conv.sales * payoutSaleConv);
-      offerRevenue += rev;
+      offerConversionRevenue += rev;
       leads += conv.leads;
       sales += conv.sales;
 
+      // Update Chart & Global Total met conversies
       const key = getGroupKey(conv.date, currentInterval);
       const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
       
@@ -200,8 +184,17 @@ export default async function Page({
       });
     });
 
+    // Voeg conversie omzet toe aan TOTAAL (maar niet adjustments, dat doet stap 3)
+    totalRevenue += offerConversionRevenue;
     totalLeads += leads;
     totalSales += sales;
+
+    // B. Specifieke RevShare voor dit offer (voor de Toplijst)
+    const offerAdjustments = campaign.adjustments.filter(adj => adj.offerId === offer.id);
+    offerAdjustments.forEach(adj => {
+        const val = convert(adj.amount, adj.currency, adj.exchangeRate);
+        offerAdjustmentRevenue += val;
+    });
 
     return {
       id: offer.id,
@@ -209,20 +202,23 @@ export default async function Page({
       network: offer.network?.name || 'Unknown',
       leads,
       sales,
-      revenue: offerRevenue
+      // HIER TELLEN WE ALLES OP: Zodat de lijst de volledige waarde toont
+      revenue: offerConversionRevenue + offerAdjustmentRevenue 
     };
   });
 
-  totalRevenue = processedTopOffers.reduce((acc, curr) => acc + curr.revenue, 0);
+  // OPMERKING: We berekenen totalRevenue nu incrementeel hierboven en hieronder,
+  // in plaats van processedTopOffers.reduce te gebruiken. Dit voorkomt dubbeltellingen.
 
-  // 3. Verwerk ADJUSTMENTS / REVSHARE
+  // 3. Verwerk ADJUSTMENTS / REVSHARE (Voor Global Total & Chart)
   campaign.adjustments.forEach(adj => {
-    // AANGEPAST: Gebruik convert() voor de juiste valuta
     const value = convert(adj.amount, adj.currency, adj.exchangeRate);
 
+    // Voeg toe aan globale totalen
     totalRevenue += value;
     totalRevShare += value;
     
+    // Voeg toe aan grafiek
     const key = getGroupKey(adj.date, currentInterval);
     const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
     chartMap.set(key, { ...current, revenue: current.revenue + value });
@@ -244,7 +240,7 @@ export default async function Page({
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const topOffers = processedTopOffers
-    .filter(o => o.revenue > 0)
+    .filter(o => o.revenue > 0) // Nu pakt hij dus ook offers die alleen revshare hebben!
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10);
 
@@ -261,8 +257,6 @@ export default async function Page({
   });
 
   const capOffers = rawCapOffers.map(offer => {
-    // Voor caps (limieten) hoeven we meestal niet om te rekenen voor het percentage, 
-    // maar voor de revenue weergave wel.
     const payoutLeadConv = convert(offer.payoutLead, 'USD', 1.0);
     const payoutSaleConv = convert(offer.payoutSale, 'USD', 1.0);
 
@@ -273,9 +267,6 @@ export default async function Page({
       currentLeads += conv.leads;
     });
 
-    // Cap revenue is vaak in USD ingesteld in de DB. Als we die willen vergelijken
-    // met de geconverteerde revenue, moeten we de cap misschien ook converteren voor weergave.
-    // Voor nu converteren we de cap ook naar de display currency voor consistentie.
     const capRevenueConv = offer.capRevenue ? convert(offer.capRevenue, 'USD', 1.0) : null;
 
     return {
@@ -308,7 +299,6 @@ export default async function Page({
       }}
       campaignName={campaign.name}
       campaignType={campaign.type || 'PAID'} 
-      // AANGEPAST: Geef valuta info door aan client
       currencySymbol={currencySymbol}
       currentCurrency={displayCurrency}
     />

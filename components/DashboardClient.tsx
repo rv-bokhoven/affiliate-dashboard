@@ -325,7 +325,8 @@ export default function DashboardClient({
                     <h4 className="text-xs font-bold text-neutral-500 uppercase mb-3">Toplijst</h4>
                     <div className="space-y-2">
                         {topOffers.map((offer, index) => (
-                            <Link href={`/offers/${offer.id}`} key={offer.id} className="block group">
+                            // <--- AANPASSING: URL Parameters (filters) meesturen in de link
+                            <Link href={`/offers/${offer.id}?${searchParams.toString()}`} key={offer.id} className="block group">
                                 <div className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800/50 border border-transparent hover:border-neutral-800 transition-all cursor-pointer">
                                     <div className="flex items-center gap-3">
                                         <span className={`flex items-center justify-center w-6 h-6 rounded text-xs font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' : index === 1 ? 'bg-neutral-500/20 text-neutral-400' : index === 2 ? 'bg-orange-500/20 text-orange-500' : 'text-neutral-600'}`}>{index + 1}</span>
@@ -344,8 +345,7 @@ export default function DashboardClient({
   );
 }
 
-// --- HULPCOMPONENTEN ---
-
+// ... Hulpcomponenten (StatsCard, CapMonitor, Heatmap) blijven ongewijzigd ...
 function StatsCard({ title, value, trend }: { title: string, value: string, trend?: 'positive' | 'negative' | 'neutral' }) {
     return (
         <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-xl shadow-sm hover:border-neutral-700 transition-colors flex flex-col justify-between h-full">
