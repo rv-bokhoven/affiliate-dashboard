@@ -1,126 +1,135 @@
-import { notFound, redirect } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { getSession } from '@/lib/auth';
-import PageContainer from '@/components/PageContainer';
-import OfferClient from './OfferClient'; 
+import { redirect } from 'next/navigation';
+// HIER ZIT DE FIX: We importeren nu uit de components map
+import OfferDetailClient from '@/components/OfferDetailClient'; 
 import { 
-  startOfMonth, endOfMonth, endOfDay as dateFnsEndOfDay, format, startOfWeek 
+  startOfMonth, endOfMonth, subMonths, 
+  startOfWeek, endOfWeek, subWeeks, 
+  startOfYear, endOfYear, 
+  parseISO, format, 
+  endOfDay as dateFnsEndOfDay
 } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
 
+// CONFIGURATIE
+const EUR_USD_RATE = 1.17; 
+
 function getEndOfDay(date: Date) { return dateFnsEndOfDay(date); }
-function getGroupKey(date: Date) { return format(date, 'yyyy-MM-dd'); }
 
-export default async function OfferPage({ 
-  params, 
-  searchParams 
+function getDateRange(range: string, from?: string, to?: string) {
+  const now = new Date();
+  if (range === 'custom' && from && to) return { start: parseISO(from), end: getEndOfDay(parseISO(to)) };
+  if (range === 'this_week') return { start: startOfWeek(now, { weekStartsOn: 1 }), end: getEndOfDay(endOfWeek(now, { weekStartsOn: 1 })) };
+  if (range === 'last_week') { const lastWeek = subWeeks(now, 1); return { start: startOfWeek(lastWeek, { weekStartsOn: 1 }), end: getEndOfDay(endOfWeek(lastWeek, { weekStartsOn: 1 })) }; }
+  if (range === 'last_month') { const lastMonth = subMonths(now, 1); return { start: startOfMonth(lastMonth), end: getEndOfDay(endOfMonth(lastMonth)) }; }
+  if (range === 'this_year') return { start: startOfYear(now), end: getEndOfDay(endOfYear(now)) };
+  if (range === 'all') return { start: new Date('2020-01-01'), end: getEndOfDay(now) };
+  return { start: startOfMonth(now), end: getEndOfDay(endOfMonth(now)) };
+}
+
+export default async function OfferDetailPage({ 
+    params, searchParams 
 }: { 
-  params: Promise<{ id: string }>,
-  searchParams: Promise<{ [key: string]: string | undefined }> 
+    params: Promise<{ id: string }>,
+    searchParams: Promise<{ [key: string]: string | undefined }> 
 }) {
-  const { id } = await params; 
-  const offerId = parseInt(id);
   const session: any = await getSession();
-
   if (!session) redirect('/login');
-  if (isNaN(offerId)) return notFound();
 
-  // 1. HAAL OFFER OP + CAMPAGNE + MEMBERS
+  const { id } = await params;
+  const qParams = await searchParams;
+
+  const offerId = parseInt(id);
+  if (isNaN(offerId)) return <div>Ongeldig ID</div>;
+
+  // 1. BEPAAL VALUTA & DATUM
+  const displayCurrency = qParams.currency === 'EUR' ? 'EUR' : 'USD';
+  const currencySymbol = displayCurrency === 'EUR' ? '€' : '$';
+  
+  const { range, from, to } = qParams;
+  const { start, end } = getDateRange(range || 'this_month', from, to);
+
+  // 2. CONVERSIE FUNCTIE
+  const convert = (amount: number, itemCurrency: string) => {
+    const itemRate = itemCurrency === 'EUR' ? EUR_USD_RATE : 1.0;
+    const amountInUSD = itemCurrency === 'EUR' ? amount * itemRate : amount;
+
+    if (displayCurrency === 'USD') return amountInUSD;
+    if (displayCurrency === 'EUR') return amountInUSD / EUR_USD_RATE;
+    return amountInUSD;
+  };
+
+  // 3. HAAL DATA
   const offer = await prisma.offer.findUnique({
-    where: { id: offerId },
-    include: {
-      network: true,
-      campaign: {
-        include: {
-          members: true 
-        }
-      },
-      conversions: true 
-    }
+      where: { id: offerId },
+      include: {
+          network: true,
+          conversions: {
+              where: { date: { gte: start, lte: end } },
+              orderBy: { date: 'asc' }
+          }
+      }
   });
 
-  // --- HIER ZIT DE FIX ---
-  // We checken nu ook: !offer.campaign
-  // Als een offer geen campagne heeft, tonen we 'Niet gevonden'.
-  // Hierdoor weet TypeScript hierna dat offer.campaign NIET null is.
-  if (!offer || !offer.campaign) {
-    return (
-      <PageContainer title="Niet gevonden" subtitle="Offer of Campagne bestaat niet">
-        <div className="p-10 text-neutral-400">
-            Offer met ID {offerId} niet gevonden of is niet gekoppeld aan een project.
-        </div>
-      </PageContainer>
-    );
-  }
+  if (!offer) return <div className="p-10 text-white">Offer niet gevonden.</div>;
 
-  // 2. SECURITY CHECK
-  let hasAccess = false;
-  if (session.role === 'SUPER_ADMIN') {
-    hasAccess = true;
-  } else {
-    // TypeScript zeurt nu niet meer, want door de check hierboven bestaat .campaign zeker weten.
-    hasAccess = offer.campaign.members.some(m => m.userId === session.userId);
-  }
+  // 4. BEREKEN STATS
+  const payoutLeadConv = convert(offer.payoutLead, offer.currency || 'USD');
+  const payoutSaleConv = convert(offer.payoutSale, offer.currency || 'USD');
 
-  if (!hasAccess) {
-    return (
-      <PageContainer title="Geen Toegang" subtitle="Beveiligd">
-        <div className="p-10 text-red-400">Je hebt geen rechten om dit offer te bekijken.</div>
-      </PageContainer>
-    );
-  }
-
-  // --- 3. DATA VERWERKEN ---
-  
-  const queryParams = await searchParams;
-  const range = queryParams.range || 'this_month';
-  const now = new Date();
-  
-  let start = startOfMonth(now);
-  let end = getEndOfDay(endOfMonth(now));
-
-  if (range === 'this_year') { start = new Date(now.getFullYear(), 0, 1); }
-  if (range === 'all') { start = new Date('2020-01-01'); }
-
-  const filteredConversions = offer.conversions.filter(c => c.date >= start && c.date <= end);
-
-  let totalRevenue = 0;
   let totalLeads = 0;
   let totalSales = 0;
+  let totalRevenue = 0;
 
-  const chartMap = new Map<string, { revenue: number, leads: number, sales: number }>();
+  const chartMap = new Map<string, { leads: number, sales: number, revenue: number }>();
 
-  filteredConversions.forEach(conv => {
-    const rev = (conv.leads * offer.payoutLead) + (conv.sales * offer.payoutSale);
-    totalRevenue += rev;
-    totalLeads += conv.leads;
-    totalSales += conv.sales;
+  offer.conversions.forEach(c => {
+      totalLeads += c.leads;
+      totalSales += c.sales;
+      const rev = (c.leads * payoutLeadConv) + (c.sales * payoutSaleConv);
+      totalRevenue += rev;
 
-    const key = getGroupKey(conv.date);
-    const current = chartMap.get(key) || { revenue: 0, leads: 0, sales: 0 };
-    chartMap.set(key, {
-      revenue: current.revenue + rev,
-      leads: current.leads + conv.leads,
-      sales: current.sales + conv.sales
-    });
+      const key = format(c.date, 'yyyy-MM-dd');
+      const current = chartMap.get(key) || { leads: 0, sales: 0, revenue: 0 };
+      chartMap.set(key, {
+          leads: current.leads + c.leads,
+          sales: current.sales + c.sales,
+          revenue: current.revenue + rev
+      });
   });
 
   const chartData = Array.from(chartMap.entries())
-    .map(([date, vals]) => ({
-      date,
-      revenue: vals.revenue,
-      leads: vals.leads,
-      sales: vals.sales
-    }))
+    .map(([date, vals]) => ({ date, ...vals }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+  const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
+
   return (
-    <OfferClient 
-      offer={offer}
-      chartData={chartData}
-      totals={{ revenue: totalRevenue, leads: totalLeads, sales: totalSales }}
-      campaignType={offer.campaign.type} // Ook hier weet TS nu dat campaign bestaat
+    <OfferDetailClient 
+        offer={{
+            id: offer.id,
+            name: offer.name,
+            network: offer.network?.name || 'Unknown',
+            status: offer.status,
+            currency: offer.currency || 'USD',
+            payoutLead: offer.payoutLead,
+            payoutSale: offer.payoutSale,
+            capLeads: offer.capLeads ? offer.capLeads : undefined,
+            capRevenue: offer.capRevenue ? offer.capRevenue : undefined,
+        }}
+        stats={{
+            leads: totalLeads,
+            sales: totalSales,
+            revenue: totalRevenue,
+            epc: 0, 
+            cr: conversionRate,
+            clicks: 0
+        }}
+        chartData={chartData}
+        currencySymbol={currencySymbol}
+        currentCurrency={displayCurrency}
     />
   );
 }
