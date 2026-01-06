@@ -203,10 +203,10 @@ export default function DashboardClient({
                <div className="flex items-center gap-2">
                   <div className="relative z-50">
                     <DatePicker selectsRange={true} startDate={startDate} endDate={endDate} onChange={(update) => setDateRange(update)} locale="nl" dateFormat="dd/MM/yyyy" placeholderText="Kies periode" isClearable={true}
-                        customInput={<button className="bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2">📅 {startDate ? startDate.toLocaleDateString() : 'Start'} - {endDate ? endDate.toLocaleDateString() : 'Eind'}</button>}
+                        customInput={<button className="bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"> {startDate ? startDate.toLocaleDateString() : 'Start'} - {endDate ? endDate.toLocaleDateString() : 'End'}</button>}
                     />
                   </div>
-                  {startDate && endDate && <button onClick={handleCustomDateApply} className="bg-white text-black text-xs px-3 py-2 rounded font-medium hover:bg-neutral-200 transition">Toepassen</button>}
+                  {startDate && endDate && <button onClick={handleCustomDateApply} className="bg-white text-black text-xs px-3 py-2 rounded font-medium hover:bg-neutral-200 transition">Apply</button>}
                </div>
              </div>
       )}
@@ -294,7 +294,16 @@ export default function DashboardClient({
                             <Tooltip 
                                 contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', color: '#f5f5f5', borderRadius: '8px' }} 
                                 labelFormatter={(label) => new Date(label).toLocaleDateString('nl-NL')}
-                                formatter={(value, name) => [(name === 'Revenue' || name === 'Costs') ? formatMoney(value as number) : value, name]}
+                                formatter={(value: number, name: string) => {
+                                // 1. Is het geld? Gebruik je formatMoney functie
+                                if (name === 'Revenue' || name === 'Costs') return [formatMoney(value), name];
+                                
+                                // 2. Is het ROI? Rond af op 2 decimalen en plak er een % achter
+                                if (name === 'ROI %') return [`${value.toFixed(2)}%`, name];
+                                
+                                // 3. Anders (bv Leads/Sales aantallen)? Gewoon tonen
+                                return [value, name];
+                            }}
                             />
                             <Legend />
                             {campaignType === 'SEO' ? (
@@ -305,9 +314,9 @@ export default function DashboardClient({
                                 </>
                             ) : (
                                 <>
-                                    <Bar yAxisId="left" dataKey="revenue" name="Revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                                    <Bar yAxisId="left" dataKey="spend" name="Costs" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                                    <Line yAxisId="right" type="monotone" dataKey="roi" name="ROI %" stroke="#10b981" strokeWidth={2} dot={false} />
+                                    <Bar yAxisId="left" dataKey="revenue" name="Revenue" fill="#FF5F00" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                                    <Bar yAxisId="left" dataKey="spend" name="Costs" fill="#E6E6E6" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                                    <Line yAxisId="right" type="monotone" dataKey="roi" name="ROI %" stroke="#10b981" strokeWidth={4} dot={false} />
                                 </>
                             )}
                             </ComposedChart>
@@ -330,7 +339,7 @@ export default function DashboardClient({
                                 <div className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800/50 border border-transparent hover:border-neutral-800 transition-all cursor-pointer">
                                     <div className="flex items-center gap-3">
                                         <span className={`flex items-center justify-center w-6 h-6 rounded text-xs font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' : index === 1 ? 'bg-neutral-500/20 text-neutral-400' : index === 2 ? 'bg-orange-500/20 text-orange-500' : 'text-neutral-600'}`}>{index + 1}</span>
-                                        <div><p className="text-sm font-medium text-neutral-200 truncate max-w-[120px] group-hover:text-blue-400 transition-colors">{offer.name}</p><p className="text-xs text-neutral-500">{offer.leads} Leads</p></div>
+                                        <div><p className="text-sm font-medium text-neutral-200 truncate max-w-[120px] group-hover:text-blue-400 transition-colors">{offer.name}</p><p className="text-xs text-neutral-500">{offer.leads} Leads - {offer.sales} Sales</p></div>
                                     </div>
                                     <div className="text-right"><p className="text-sm font-bold text-neutral-100">{formatMoney(offer.revenue)}</p></div>
                                 </div>
