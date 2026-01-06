@@ -23,7 +23,7 @@ interface DashboardData {
   leads: number; 
   sales: number; 
   profit: number;
-  roi: number;
+  roi: number | null;
   googleSpend?: number;
   microsoftSpend?: number;
 }
@@ -294,14 +294,11 @@ export default function DashboardClient({
                             <Tooltip 
                                 contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', color: '#f5f5f5', borderRadius: '8px' }} 
                                 labelFormatter={(label) => new Date(label).toLocaleDateString('nl-NL')}
-                                formatter={(value: number, name: string) => {
-                                // 1. Is het geld? Gebruik je formatMoney functie
+                            formatter={(value: any, name: string) => { // Type 'any' of 'number | null' is hier handig
+                                if (value === null) return ['-', name]; // <--- Veiligheidscheck
+
                                 if (name === 'Revenue' || name === 'Costs') return [formatMoney(value), name];
-                                
-                                // 2. Is het ROI? Rond af op 2 decimalen en plak er een % achter
                                 if (name === 'ROI %') return [`${value.toFixed(2)}%`, name];
-                                
-                                // 3. Anders (bv Leads/Sales aantallen)? Gewoon tonen
                                 return [value, name];
                             }}
                             />
@@ -429,7 +426,7 @@ function Heatmap({ data, currencySymbol }: { data: DashboardData[], currencySymb
             return (
               <div key={day.date} className="group relative">
                 <div className="w-full aspect-square rounded-md border flex items-center justify-center transition hover:scale-105 cursor-pointer" style={{ backgroundColor: bgColor, borderColor: borderColor }}><span className="text-[10px] font-medium text-white/80 drop-shadow-md">{new Date(day.date).getDate()}</span></div>
-                <div className={`absolute left-1/2 -translate-x-1/2 w-32 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-neutral-200 opacity-0 group-hover:opacity-100 pointer-events-none transition z-50 shadow-xl ${tooltipPosition}`}><p className="font-bold text-center border-b border-neutral-800 pb-1 mb-1">{formatDate(day.date)}</p><div className="flex justify-between"><span>Winst:</span><span className={day.profit >= 0 ? "text-green-400" : "text-red-400"}>{currencySymbol}{day.profit.toFixed(0)}</span></div><div className="flex justify-between text-neutral-500"><span>ROI:</span><span>{day.roi.toFixed(0)}%</span></div></div>
+                <div className={`absolute left-1/2 -translate-x-1/2 w-32 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-neutral-200 opacity-0 group-hover:opacity-100 pointer-events-none transition z-50 shadow-xl ${tooltipPosition}`}><p className="font-bold text-center border-b border-neutral-800 pb-1 mb-1">{formatDate(day.date)}</p><div className="flex justify-between"><span>Winst:</span><span className={day.profit >= 0 ? "text-green-400" : "text-red-400"}>{currencySymbol}{day.profit.toFixed(0)}</span></div><div className="flex justify-between text-neutral-500"><span>ROI:</span><span>{day.roi !== null ? day.roi.toFixed(0) : 0}%</span></div></div>
               </div>
             );
           })}

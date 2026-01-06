@@ -80,14 +80,25 @@ export async function POST(req: Request) {
       const googleData = data.google;
       const microsoftData = data.microsoft;
 
-      if (googleData && parseFloat(googleData.amount) > 0) {
-          await upsertSpend(date, campaignId, 'Google Ads', parseFloat(googleData.amount), googleData.currency, googleData.exchangeRate);
+// HULPFUNCTIE: Maak van leeg of tekst een getal (0 als leeg)
+      const parseAmount = (val: any) => {
+          if (val === '' || val === null || val === undefined) return 0;
+          const parsed = parseFloat(val);
+          return isNaN(parsed) ? 0 : parsed;
+      };
+
+      if (googleData) {
+          const amount = parseAmount(googleData.amount);
+          // We voeren de update UIT, ook als het 0 is.
+          // Alleen als de input echt ongeldig was (NaN) slaan we over, maar parseAmount vangt dat al af.
+          await upsertSpend(date, campaignId, 'Google Ads', amount, googleData.currency, googleData.exchangeRate);
       }
       
-      if (microsoftData && parseFloat(microsoftData.amount) > 0) {
-          await upsertSpend(date, campaignId, 'Microsoft Ads', parseFloat(microsoftData.amount), microsoftData.currency, microsoftData.exchangeRate);
+      if (microsoftData) {
+          const amount = parseAmount(microsoftData.amount);
+          await upsertSpend(date, campaignId, 'Microsoft Ads', amount, microsoftData.currency, microsoftData.exchangeRate);
       }
-    } 
+    }
     else if (type === 'conversions') {
       // ... Conversie logica blijft ongewijzigd ...
       for (const item of data) {

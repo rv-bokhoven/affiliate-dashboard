@@ -228,15 +228,25 @@ export default async function Page({
   const roi = totalSpend > 0 ? (profit / totalSpend) * 100 : 0;
 
   const chartData = Array.from(chartMap.entries())
-    .map(([date, vals]) => ({
-      date,
-      spend: vals.spend,
-      revenue: vals.revenue,
-      leads: vals.leads, 
-      sales: vals.sales, 
-      profit: vals.revenue - vals.spend,
-      roi: vals.spend > 0 ? ((vals.revenue - vals.spend) / vals.spend) * 100 : 0
-    }))
+.map(([date, vals]) => {
+      // Check of er activiteit is (Spend of Revenue)
+      const hasActivity = vals.spend !== 0 || vals.revenue !== 0;
+
+      return {
+        date,
+        spend: vals.spend,
+        revenue: vals.revenue,
+        leads: vals.leads, 
+        sales: vals.sales, 
+        profit: vals.revenue - vals.spend,
+        
+        // DE FIX: Als er geen activiteit is, is ROI 'null' (breekt de lijn).
+        // Is er wel activiteit? Dan berekenen we de ROI (of 0 als spend 0 is).
+        roi: hasActivity 
+             ? (vals.spend > 0 ? ((vals.revenue - vals.spend) / vals.spend) * 100 : 0)
+             : null
+      };
+    })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const topOffers = processedTopOffers

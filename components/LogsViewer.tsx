@@ -15,7 +15,7 @@ interface DailyLog {
 interface LogsViewerProps {
   logs: DailyLog[];
   campaignName: string;
-  offerMap: Record<number, string>; // <--- Nieuwe prop
+  offerMap: Record<number, string>;
 }
 
 export default function LogsViewer({ logs, campaignName, offerMap }: LogsViewerProps) {
@@ -28,25 +28,53 @@ export default function LogsViewer({ logs, campaignName, offerMap }: LogsViewerP
       return <span className="text-red-500 text-xs">Data error</span>;
     }
 
-    // --- SPEND LOGS ---
+    // --- SPEND LOGS (FIXED) ---
     if (log.type === 'spend') {
+      // Hulpfunctie om de data te normaliseren (werkt voor oude getallen én nieuwe objecten)
+      const parseSpend = (val: any) => {
+        if (!val && val !== 0) return null; // Leeg? Return null
+        
+        // Nieuwe manier: Het is een object met amount en currency
+        if (typeof val === 'object' && val !== null && val.amount !== undefined) {
+           return { 
+             amount: Number(val.amount), 
+             currency: val.currency || 'USD' 
+           };
+        }
+        
+        // Oude manier: Het was direct een getal (backward compatibility)
+        return { 
+          amount: Number(val), 
+          currency: 'USD' 
+        };
+      };
+
+      const google = parseSpend(data.google);
+      const microsoft = parseSpend(data.microsoft);
+
+      const getSymbol = (curr: string) => curr === 'EUR' ? '€' : '$';
+
       return (
         <div className="flex gap-4 text-xs">
-          {data.google && Number(data.google) > 0 && (
+          {/* We checken nu op 'google' object ipv > 0, zodat 0.00 ook getoond wordt */}
+          {google && (
             <span className="flex items-center gap-1 text-neutral-400">
-              Google: <span className="text-neutral-200 font-medium">${Number(data.google).toFixed(2)}</span>
+              Google: <span className="text-neutral-200 font-medium">{getSymbol(google.currency)}{google.amount.toFixed(2)}</span>
             </span>
           )}
-          {data.microsoft && Number(data.microsoft) > 0 && (
+          
+          {microsoft && (
             <span className="flex items-center gap-1 text-neutral-400">
-              Microsoft: <span className="text-neutral-200 font-medium">${Number(data.microsoft).toFixed(2)}</span>
+              Microsoft: <span className="text-neutral-200 font-medium">{getSymbol(microsoft.currency)}{microsoft.amount.toFixed(2)}</span>
             </span>
           )}
+
+          {!google && !microsoft && <span className="text-neutral-600 italic">Geen spend ingevoerd</span>}
         </div>
       );
     } 
     
-    // --- CONVERSION LOGS (AANGEPAST) ---
+    // --- CONVERSION LOGS ---
     if (log.type === 'conversions') {
       const items = Array.isArray(data) ? data : [];
       
@@ -55,7 +83,7 @@ export default function LogsViewer({ logs, campaignName, offerMap }: LogsViewerP
       return (
         <div className="flex flex-col gap-1">
             {items.map((item: any, idx: number) => {
-                const offerName = offerMap[item.offerId] || `Offer #${item.offerId}`; // <--- Naam opzoeken
+                const offerName = offerMap[item.offerId] || `Offer #${item.offerId}`;
                 const leads = parseInt(item.leads || 0);
                 const sales = parseInt(item.sales || 0);
                 
