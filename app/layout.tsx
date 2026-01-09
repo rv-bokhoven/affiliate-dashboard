@@ -8,7 +8,7 @@ import { cookies } from 'next/headers';
 import { getSession } from '@/lib/auth';
 
 export const metadata: Metadata = {
-  title: 'Affiliate Pro',
+  title: 'Tedlytics Pro',
   description: 'Advanced Campaign Tracking',
 };
 

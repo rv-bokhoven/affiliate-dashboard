@@ -67,11 +67,11 @@ export default function Sidebar({ campaigns, activeCampaignId, user, currentRole
   const initials = displayName.substring(0, 2).toUpperCase();
 
   return (
-    <aside className="w-64 h-screen bg-neutral-950 border-r border-neutral-800 flex flex-col fixed left-0 top-0 z-50">
+    <aside className="w-64 h-screen bg-neutral-900 border-r border-neutral-800 flex flex-col fixed left-0 top-0 z-50">
       {/* HEADER */}
       <div className="p-4 border-b border-neutral-800/50">
         <div className="relative">
-            <button onClick={() => setDropdownOpen(!isDropdownOpen)} className="w-full flex items-center justify-between bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-white px-3 py-2 rounded-lg transition-colors group">
+            <button onClick={() => setDropdownOpen(!isDropdownOpen)} className="w-full flex items-center justify-between bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-white px-3 py-2 rounded-lg transition-colors group">
                 <div className="flex items-center gap-3 overflow-hidden">
                     <div className="w-8 h-8 rounded-md bg-white text-black flex items-center justify-center font-bold shrink-0 overflow-hidden border border-neutral-700">
                         {activeProject?.logo ? (

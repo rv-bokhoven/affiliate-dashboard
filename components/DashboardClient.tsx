@@ -171,7 +171,7 @@ export default function DashboardClient({
       title="Dashboard"
       subtitle={
         <div className="flex items-center gap-2">
-            <span>Overzicht voor <span className="text-neutral-100 font-medium">{campaignName}</span></span>
+            <span>Overview for <span className="text-neutral-100 font-medium">{campaignName}</span></span>
             <span className={`text-[10px] px-2 py-0.5 rounded-full border ${campaignType === 'SEO' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'}`}>
                 {campaignType}
             </span>
@@ -328,7 +328,7 @@ export default function DashboardClient({
             <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                 <div className="mb-8"><CapMonitor offers={capOffers} formatMoney={formatMoney} /></div>
                 <div>
-                    <h4 className="text-xs font-bold text-neutral-500 uppercase mb-3">Toplijst</h4>
+                    <h4 className="text-xs font-bold text-neutral-500 uppercase mb-3">Toplist</h4>
                     <div className="space-y-2">
                         {topOffers.map((offer, index) => (
                             // <--- AANPASSING: URL Parameters (filters) meesturen in de link
