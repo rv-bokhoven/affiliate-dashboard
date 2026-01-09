@@ -68,7 +68,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    // 1. AUTENTICATIE CHECK (Sessie OF API Key)
+    // 1. AUTENTICATIE CHECK
     const session = await getSession();
     const apiKey = req.headers.get('x-api-key');
 
@@ -84,32 +84,37 @@ export async function POST(req: Request) {
     // HULPFUNCTIE: Maak van leeg of tekst een getal (0 als leeg/fout)
     const parseAmount = (val: any) => {
         if (val === '' || val === null || val === undefined) return 0;
-        // Make.com stuurt soms getallen, soms strings. parseFloat pakt beide.
         const parsed = parseFloat(val);
         return isNaN(parsed) ? 0 : parsed;
     };
 
-    // 2. DATA VOORBEREIDEN (Schoonmaken VOORDAT we loggen)
-    let processedData = data;
+    // 2. DATA VOORBEREIDEN (Alleen verwerken wat er écht is)
+    let processedData: any = {};
 
     if (type === 'spend') {
-        // We bouwen het object opnieuw op met echte getallen
-        // Dit zorgt dat ook een lege input als "0" in de logs en DB komt
-        processedData = {
-            google: { 
-                amount: parseAmount(data.google?.amount), 
-                currency: data.google?.currency || 'USD',
-                exchangeRate: data.google?.exchangeRate || 1.0
-            },
-            microsoft: { 
-                amount: parseAmount(data.microsoft?.amount), 
-                currency: data.microsoft?.currency || 'USD',
-                exchangeRate: data.microsoft?.exchangeRate || 1.0
-            }
-        };
+        // Check of Google in de data zit
+        if (data.google) {
+            processedData.google = { 
+                amount: parseAmount(data.google.amount), 
+                currency: data.google.currency || 'USD',
+                exchangeRate: data.google.exchangeRate || 1.0
+            };
+        }
+
+        // Check of Microsoft in de data zit (zo niet: slaan we dit over!)
+        if (data.microsoft) {
+            processedData.microsoft = { 
+                amount: parseAmount(data.microsoft.amount), 
+                currency: data.microsoft.currency || 'USD',
+                exchangeRate: data.microsoft.exchangeRate || 1.0
+            };
+        }
+    } else {
+        // Voor andere types (zoals conversions) nemen we de data over zoals die is
+        processedData = data;
     }
 
-    // 3. LOG OPSLAAN (Nu met de SCHONE data waar 0 in staat i.p.v. lege strings)
+    // 3. LOG OPSLAAN (Met de opgeschoonde data)
     const log = await prisma.dailyLog.create({
       data: {
         type,
@@ -119,19 +124,19 @@ export async function POST(req: Request) {
       }
     });
 
-    // 4. DATABASE UPDATEN (Met de schone processedData)
+    // 4. DATABASE UPDATEN
     if (type === 'spend') {
-      const googleData = processedData.google;
-      const microsoftData = processedData.microsoft;
-
-      // Update Google (ook als het 0 is)
-      await upsertSpend(date, campaignId, 'Google Ads', googleData.amount, googleData.currency, googleData.exchangeRate);
+      // Alleen updaten als het object bestaat in processedData
+      if (processedData.google) {
+          await upsertSpend(date, campaignId, 'Google Ads', processedData.google.amount, processedData.google.currency, processedData.google.exchangeRate);
+      }
       
-      // Update Microsoft (ook als het 0 is)
-      await upsertSpend(date, campaignId, 'Microsoft Ads', microsoftData.amount, microsoftData.currency, microsoftData.exchangeRate);
+      if (processedData.microsoft) {
+          await upsertSpend(date, campaignId, 'Microsoft Ads', processedData.microsoft.amount, processedData.microsoft.currency, processedData.microsoft.exchangeRate);
+      }
     }
     else if (type === 'conversions') {
-      // Conversies verwerken (gebruikt data array direct, parseAmount logic zit hieronder in de loop)
+      // Conversies verwerken
       for (const item of data) {
         if (item.offerId) {
             const targetDate = new Date(date);
