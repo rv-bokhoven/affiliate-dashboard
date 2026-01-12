@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { getSession } from '@/lib/auth'; // Zorg dat deze import klopt voor jouw project
+import { getSession } from '@/lib/auth';
 import { startOfDay, endOfDay } from 'date-fns';
 
 // ---------------------------------------------------------
 // CONFIGURATIE: API BEVEILIGING
 // ---------------------------------------------------------
-// Kies hier een lang, sterk wachtwoord. Dit gebruik je in Make.com bij de Headers.
 const API_SECRET = process.env.API_SECRET || '301Willemstraat!27';
 
 export async function GET(req: Request) {
@@ -35,13 +34,14 @@ export async function GET(req: Request) {
       where: { offer: { campaignId }, date: range }
     });
 
-    // C. Format data - NU MET CURRENCY INFO
+    // C. Format data - NU MET CLICKS EN CURRENCY
     const getPlatformData = (name: string) => {
         const item = spends.find(s => s.platform.toLowerCase().includes(name));
         if (!item) return null;
         return {
             amount: item.amount,
-            currency: item.currency || 'USD' // Default fallback
+            clicks: item.clicks || 0, // <--- NIEUW: Clicks meegeven aan dashboard
+            currency: item.currency || 'USD'
         };
     };
 
@@ -81,40 +81,48 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { type, date, campaignId, data } = body;
 
-    // HULPFUNCTIE: Maak van leeg of tekst een getal (0 als leeg/fout)
+    // HULPFUNCTIE: Maak van leeg of tekst een float (bedrag)
     const parseAmount = (val: any) => {
         if (val === '' || val === null || val === undefined) return 0;
         const parsed = parseFloat(val);
         return isNaN(parsed) ? 0 : parsed;
     };
 
-    // 2. DATA VOORBEREIDEN (Alleen verwerken wat er écht is)
+    // HULPFUNCTIE: Maak van leeg of tekst een integer (clicks) -- NIEUW
+    const parseClicks = (val: any) => {
+        if (val === '' || val === null || val === undefined) return 0;
+        const parsed = parseInt(val);
+        return isNaN(parsed) ? 0 : parsed;
+    };
+
+    // 2. DATA VOORBEREIDEN
     let processedData: any = {};
 
     if (type === 'spend') {
-        // Check of Google in de data zit
+        // Google Data Verwerken
         if (data.google) {
             processedData.google = { 
                 amount: parseAmount(data.google.amount), 
+                clicks: parseClicks(data.google.clicks), // <--- Clicks ophalen
                 currency: data.google.currency || 'USD',
                 exchangeRate: data.google.exchangeRate || 1.0
             };
         }
 
-        // Check of Microsoft in de data zit (zo niet: slaan we dit over!)
+        // Microsoft Data Verwerken
         if (data.microsoft) {
             processedData.microsoft = { 
                 amount: parseAmount(data.microsoft.amount), 
+                clicks: parseClicks(data.microsoft.clicks), // <--- Clicks ophalen
                 currency: data.microsoft.currency || 'USD',
                 exchangeRate: data.microsoft.exchangeRate || 1.0
             };
         }
     } else {
-        // Voor andere types (zoals conversions) nemen we de data over zoals die is
         processedData = data;
     }
 
-    // 3. LOG OPSLAAN (Met de opgeschoonde data)
+    // 3. LOG OPSLAAN
     const log = await prisma.dailyLog.create({
       data: {
         type,
@@ -126,17 +134,32 @@ export async function POST(req: Request) {
 
     // 4. DATABASE UPDATEN
     if (type === 'spend') {
-      // Alleen updaten als het object bestaat in processedData
+      
       if (processedData.google) {
-          await upsertSpend(date, campaignId, 'Google Ads', processedData.google.amount, processedData.google.currency, processedData.google.exchangeRate);
+          await upsertSpend(
+            date, 
+            campaignId, 
+            'Google Ads', 
+            processedData.google.amount, 
+            processedData.google.clicks, // <--- Clicks doorgeven
+            processedData.google.currency, 
+            processedData.google.exchangeRate
+          );
       }
       
       if (processedData.microsoft) {
-          await upsertSpend(date, campaignId, 'Microsoft Ads', processedData.microsoft.amount, processedData.microsoft.currency, processedData.microsoft.exchangeRate);
+          await upsertSpend(
+            date, 
+            campaignId, 
+            'Microsoft Ads', 
+            processedData.microsoft.amount, 
+            processedData.microsoft.clicks, // <--- Clicks doorgeven
+            processedData.microsoft.currency, 
+            processedData.microsoft.exchangeRate
+          );
       }
     }
     else if (type === 'conversions') {
-      // Conversies verwerken
       for (const item of data) {
         if (item.offerId) {
             const targetDate = new Date(date);
@@ -165,8 +188,16 @@ export async function POST(req: Request) {
   }
 }
 
-// Hulpfunctie om spend te upserten MET VALUTA
-async function upsertSpend(dateStr: string, campaignId: any, platform: string, amount: number, currency: string, exchangeRate: number) {
+// Hulpfunctie om spend te upserten MET CLICKS EN VALUTA
+async function upsertSpend(
+    dateStr: string, 
+    campaignId: any, 
+    platform: string, 
+    amount: number, 
+    clicks: number, // <--- Nieuw argument
+    currency: string, 
+    exchangeRate: number
+) {
   const date = new Date(dateStr);
   const cId = parseInt(campaignId);
 
@@ -180,6 +211,7 @@ async function upsertSpend(dateStr: string, campaignId: any, platform: string, a
     },
     update: {
         amount: amount,
+        clicks: clicks, // <--- Update clicks
         currency: currency || 'USD',
         exchangeRate: exchangeRate || 1.0
     },
@@ -188,6 +220,7 @@ async function upsertSpend(dateStr: string, campaignId: any, platform: string, a
         campaignId: cId,
         platform: platform,
         amount: amount,
+        clicks: clicks, // <--- Create clicks
         currency: currency || 'USD',
         exchangeRate: exchangeRate || 1.0
     }

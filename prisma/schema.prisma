@@ -97,6 +97,8 @@ model DailySpend {
   platform     String   
   
   amount       Float    
+  clicks       Int      @default(0)
+
   currency     String   @default("EUR") 
   exchangeRate Float    @default(1.0) 
 

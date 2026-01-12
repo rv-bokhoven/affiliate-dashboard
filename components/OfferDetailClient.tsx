@@ -86,7 +86,7 @@ export default function OfferDetailClient({ offer, stats, chartData, currencySym
   return (
     <PageContainer
         title={offer.name}
-        subtitle={<div className="flex items-center gap-2"><Link href="/" className="hover:text-white transition">Dashboard</Link> <span>/</span> <span className="text-neutral-200">{offer.network}</span></div>}
+        subtitle={<div className="flex items-center gap-2"><Link href="/" className="hover:text-white transition">Dashboard</Link> <span>/</span> <span className="text-neutral-200">{offer.name}</span></div>}
         actions={
             <div className="flex items-center gap-3">
                 <button onClick={toggleCurrency} className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition h-[38px]" title="Wissel Valuta">

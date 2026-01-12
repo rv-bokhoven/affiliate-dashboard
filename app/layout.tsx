@@ -22,11 +22,11 @@ export default async function RootLayout({
   let campaigns: any[] = [];
   let activeCampaignId = 1;
   let currentUser = null;
-  let currentRole = 'MEMBER'; // Standaard rol is beperkt
+  let currentRole = 'MEMBER'; 
 
   if (session) {
     const userId = session.userId;
-    const userRole = session.role; // Dit is de global role (SUPER_ADMIN of USER)
+    const userRole = session.role; 
 
     // 1. Haal user op
     currentUser = await prisma.user.findUnique({
@@ -52,9 +52,8 @@ export default async function RootLayout({
 
     // 3. BEPAAL DE ROL VOOR HET HUIDIGE PROJECT
     if (userRole === 'SUPER_ADMIN') {
-        currentRole = 'ADMIN'; // Super admin is altijd de baas
+        currentRole = 'ADMIN'; 
     } else {
-        // Zoek de rol van deze gewone user in dit specifieke project
         const membership = await prisma.campaignMember.findUnique({
             where: {
                 userId_campaignId: {
@@ -63,7 +62,6 @@ export default async function RootLayout({
                 }
             }
         });
-        // Als lidmaatschap bestaat, pak die rol (ADMIN of MEMBER), anders MEMBER
         currentRole = membership?.role || 'MEMBER';
     }
   }
@@ -78,11 +76,12 @@ export default async function RootLayout({
                 campaigns={campaigns} 
                 activeCampaignId={activeCampaignId} 
                 user={currentUser} 
-                currentRole={currentRole} // <--- NIEUW: Geef de rol mee
+                currentRole={currentRole} 
             />
           )}
           
-          <div className={`flex-1 ${session ? 'pl-64' : ''}`}> 
+          {/* HIER IS DE AANPASSING: pl-0 op mobiel, md:pl-64 op desktop */}
+          <div className={`flex-1 ${session ? 'pl-0 md:pl-64' : ''} transition-all duration-300`}> 
             {children}
           </div>
           
