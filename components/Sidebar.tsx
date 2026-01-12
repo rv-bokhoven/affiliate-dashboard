@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, Tags, Wallet, PenLine, ClipboardList, 
-  ChevronsUpDown, Check, Settings, LogOut, Menu, X, 
-  Ghost // <--- NIEUW: Icon voor het logo
+  ChevronsUpDown, Check, Settings, LogOut, Menu, X, MousePointerClick, 
+  Activity 
 } from 'lucide-react';
 import { setActiveCampaign, logout } from '@/app/actions';
 
@@ -103,12 +103,11 @@ export default function Sidebar({ campaigns, activeCampaignId, user, currentRole
             md:translate-x-0
         `}>
         
-        {/* --- NIEUW: SYSTEEM LOGO --- */}
-        {/* De mt-14 zorgt dat hij op mobiel onder het hamburger-knopje zakt, op desktop is die 0 */}
+        {/* --- SYSTEEM LOGO --- */}
         <div className="h-16 flex items-center px-6 border-b border-neutral-800/50 mt-14 md:mt-0 shrink-0">
             <div className="flex items-center gap-3 text-white">
-                <div className="w-8 h-8 rounded-lg bg-neutral-50 flex items-center justify-center">
-                    <Ghost size={18} className="text-black" strokeWidth={3} />
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                    <Activity size={18} className="text-white" strokeWidth={3} />
                 </div>
                 <span className="font-bold text-m tracking-tight">Tedlytics</span>
             </div>
@@ -164,10 +163,16 @@ export default function Sidebar({ campaigns, activeCampaignId, user, currentRole
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
             <p className="px-3 text-xs font-medium text-neutral-500 mb-2 mt-2 uppercase tracking-wider">Platform</p>
             {navItem('/', <LayoutDashboard size={18} />, 'Overview')}
+            
+            {/* AANPASSING: Verberg traffic als het SEO is */}
+            {activeProject?.type !== 'SEO' && (
+                navItem('/traffic', <MousePointerClick size={18} />, 'Traffic')
+            )}
+            
             {navItem('/offers', <Tags size={18} />, 'Offers')}
-            {navItem('/finance', <Wallet size={18} />, 'Revshare')}
             <p className="px-3 text-xs font-medium text-neutral-500 mb-2 mt-6 uppercase tracking-wider">Tools</p>
             {navItem('/input', <PenLine size={18} />, 'Daily Input')}
+            {navItem('/finance', <Wallet size={18} />, 'Revshare')}
             {navItem('/logs', <ClipboardList size={18} />, 'Logs')}
             
             {/* CHECK OP ROL */}

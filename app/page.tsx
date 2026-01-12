@@ -9,7 +9,8 @@ import {
   startOfWeek, endOfWeek, subWeeks, 
   startOfYear, endOfYear, 
   parseISO, format, 
-  endOfDay as dateFnsEndOfDay
+  endOfDay as dateFnsEndOfDay,
+  subDays, startOfDay
 } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -22,6 +23,10 @@ function getEndOfDay(date: Date) { return dateFnsEndOfDay(date); }
 function getDateRange(range: string, from?: string, to?: string) {
   const now = new Date();
   if (range === 'custom' && from && to) return { start: parseISO(from), end: getEndOfDay(parseISO(to)) };
+  if (range === 'yesterday') {
+      const yesterday = subDays(now, 1);
+      return { start: startOfDay(yesterday), end: getEndOfDay(yesterday) };
+  }
   if (range === 'this_week') return { start: startOfWeek(now, { weekStartsOn: 1 }), end: getEndOfDay(endOfWeek(now, { weekStartsOn: 1 })) };
   if (range === 'last_week') { const lastWeek = subWeeks(now, 1); return { start: startOfWeek(lastWeek, { weekStartsOn: 1 }), end: getEndOfDay(endOfWeek(lastWeek, { weekStartsOn: 1 })) }; }
   if (range === 'last_month') { const lastMonth = subMonths(now, 1); return { start: startOfMonth(lastMonth), end: getEndOfDay(endOfMonth(lastMonth)) }; }
@@ -101,7 +106,7 @@ export default async function Page({
   // --- DATA OPHALEN ---
 
   const { range, from, to, interval } = params;
-  const { start, end } = getDateRange(range || 'this_month', from, to);
+  const { start, end } = getDateRange(range || 'yesterday', from, to);
   const currentInterval = interval || 'day';
   
   const now = new Date();

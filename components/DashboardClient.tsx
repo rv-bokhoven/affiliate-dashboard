@@ -67,6 +67,7 @@ function DateFilter({ value, onChange }: { value: string, onChange: (val: string
     const containerRef = useRef<HTMLDivElement>(null);
   
     const options = [
+      { label: 'Yesterday', value: 'yesterday' },
       { label: 'This Week', value: 'this_week' },
       { label: 'Last Week', value: 'last_week' },
       { label: 'This Month', value: 'this_month' },
@@ -126,7 +127,7 @@ export default function DashboardClient({
   
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentFilter = searchParams.get('range') || 'this_month';
+  const currentFilter = searchParams.get('range') || 'yesterday';
   const currentInterval = searchParams.get('interval') || 'day';
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [startDate, endDate] = dateRange;
