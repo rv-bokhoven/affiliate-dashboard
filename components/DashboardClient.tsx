@@ -54,7 +54,6 @@ interface DashboardClientProps {
       sales: number; 
       revShare: number; 
   };
-  // NIEUW: Trends object voor vorige periode data
   trends: {
       revenue: number;
       profit: number;
@@ -66,7 +65,7 @@ interface DashboardClientProps {
   currentCurrency: string;
 }
 
-// ... DateFilter component stays exactly the same ...
+// --- Datum Filter Dropdown ---
 function DateFilter({ value, onChange }: { value: string, onChange: (val: string) => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -179,7 +178,6 @@ export default function DashboardClient({
 
   const revenueTrend = calculateTrend(totals.revenue, trends.revenue);
   const profitTrend = calculateTrend(totals.profit, trends.profit);
-  // const spendTrend = calculateTrend(totals.spend, trends.spend); // Optioneel
 
   return (
     <PageContainer 
@@ -235,7 +233,7 @@ export default function DashboardClient({
         ) : (
             <>
                 {/* Spend Card (Neutral - Hover Effect behouden) */}
-                <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-xl shadow-sm relative group overflow-visible">
+                <div className="bg-neutral-900/50 border border-neutral-800 p-4 md:p-6 rounded-xl shadow-sm relative group overflow-visible">
                     <div className="flex justify-between items-start mb-2">
                         <p className="text-sm font-medium text-neutral-500">Total Spend</p>
                         <div className="relative">
@@ -291,10 +289,12 @@ export default function DashboardClient({
       </div>
 
       {/* 3. CHART - FULL WIDTH */}
-      <div className="w-full bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 mb-6">
-            <div className="flex justify-between items-center mb-6">
+      {/* FIX: p-4 op mobile, p-6 op desktop voor meer ruimte */}
+      <div className="w-full bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6 mb-6">
+            {/* FIX: flex-col op mobiel zodat de knoppen niet buiten beeld vallen */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h3 className="text-lg font-semibold text-neutral-200">{chartType === 'line' ? 'Performance Overview' : 'Profit Heatmap'}</h3>
-                <div className="flex gap-4">
+                <div className="flex gap-4 self-end sm:self-auto">
                     <div className="flex bg-neutral-900 border border-neutral-800 rounded-lg p-1">
                         <button onClick={() => setChartType('line')} className={`px-2 py-1 text-xs rounded transition ${chartType === 'line' ? 'bg-neutral-800 text-white' : 'text-neutral-500'}`}>📈</button>
                         <button onClick={() => setChartType('heatmap')} className={`px-2 py-1 text-xs rounded transition ${chartType === 'heatmap' ? 'bg-neutral-800 text-white' : 'text-neutral-500'}`}>📅</button>
@@ -309,7 +309,8 @@ export default function DashboardClient({
                 </div>
             </div>
             
-            <div className="w-full h-[350px]">
+            {/* FIX: min-w-0 toegevoegd om chart overflow te voorkomen */}
+            <div className="w-full h-[350px] min-w-0">
                 {data.length > 0 ? (
                     chartType === 'line' ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -360,7 +361,8 @@ export default function DashboardClient({
              <CapMonitor offers={capOffers} formatMoney={formatMoney} />
           )}
 
-          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6">
+          {/* FIX: p-4 mobile */}
+          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6">
             <h3 className="text-lg font-semibold text-neutral-200 mb-4">Top Offers</h3>
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-neutral-400">
@@ -420,18 +422,17 @@ export default function DashboardClient({
 // --- HULPCOMPONENTEN ---
 
 function StatsCard({ title, value, trend, trendLabel }: { title: string, value: string, trend?: 'positive' | 'negative' | 'neutral', trendLabel?: string }) {
-    // Kleur waarde op basis van trend (zoals je wilde)
     const valueColor = trend === 'positive' ? 'text-green-500' : trend === 'negative' ? 'text-red-500' : 'text-neutral-100';
 
     return (
-        <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-xl shadow-sm hover:border-neutral-700 transition-colors flex flex-col justify-between h-full">
+        // FIX: padding aangepast naar p-4 md:p-6
+        <div className="bg-neutral-900/50 border border-neutral-800 p-4 md:p-6 rounded-xl shadow-sm hover:border-neutral-700 transition-colors flex flex-col justify-between h-full">
             <p className="text-sm font-medium text-neutral-500 mb-2">{title}</p>
             <div className="flex items-end justify-between">
                 <h3 className="text-2xl font-bold text-neutral-100">{value}</h3>
                 
-                {/* Toon Badge met percentage als trendLabel aanwezig is */}
                 {trend && trendLabel && (
-                    <span className={`flex items-center px-2 py-1 rounded mb-1 text-xs font-medium ${trend === 'positive' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                    <span className={`flex items-center px-2 py-1 rounded-full text-xs font-medium border ${trend === 'positive' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
                         {trend === 'positive' ? <ArrowUpRight size={12} className="mr-1"/> : <ArrowDownRight size={12} className="mr-1"/>}
                         {trendLabel}
                     </span>
@@ -444,7 +445,7 @@ function StatsCard({ title, value, trend, trendLabel }: { title: string, value: 
 function CapMonitor({ offers, formatMoney }: { offers: TopOffer[], formatMoney: (val: number) => string }) {
     if (!offers || offers.length === 0) return null;
     return (
-      <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 shadow-sm">
+      <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle size={18} className="text-orange-500" />
           <h2 className="text-base font-bold text-neutral-200">Active Cap Monitors</h2>
@@ -476,8 +477,9 @@ function Heatmap({ data, currencySymbol }: { data: DashboardData[], currencySymb
     const firstDate = new Date(data[0].date); const dayOfWeek = firstDate.getDay(); const emptySlots = dayOfWeek === 0 ? 6 : dayOfWeek - 1; const weekDays = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
     return (
       <div className="h-full flex flex-col overflow-hidden">
-        <div className="grid grid-cols-7 gap-2 mb-2">{weekDays.map(day => <div key={day} className="text-[10px] text-neutral-500 font-medium text-center uppercase tracking-wider">{day}</div>)}</div>
-        <div className="grid grid-cols-7 gap-2 overflow-y-auto pr-2 pb-10 content-start custom-scrollbar">
+        {/* FIX: gap verkleind voor mobiel (gap-1 md:gap-2) */}
+        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">{weekDays.map(day => <div key={day} className="text-[10px] text-neutral-500 font-medium text-center uppercase tracking-wider">{day}</div>)}</div>
+        <div className="grid grid-cols-7 gap-1 md:gap-2 overflow-y-auto pr-2 pb-10 content-start custom-scrollbar">
           {Array.from({ length: emptySlots }).map((_, i) => <div key={`empty-${i}`} className="w-full aspect-square" />)}
           {data.map((day, index) => {
             const isProfit = day.profit >= 0; let opacity = 0.1;
