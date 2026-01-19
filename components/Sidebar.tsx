@@ -116,7 +116,7 @@ export default function Sidebar({ campaigns, activeCampaignId, user, currentRole
         {/* HEADER (PROJECT SWITCHER) */}
         <div className="p-4 border-b border-neutral-800/50"> 
             <div className="relative">
-                <button onClick={() => setDropdownOpen(!isDropdownOpen)} className="w-full flex items-center justify-between bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-white px-3 py-2 rounded-lg transition-colors group">
+                <button onClick={() => setDropdownOpen(!isDropdownOpen)} className="w-full flex items-center justify-between bg-neutral-800 hover:bg-neutral-900 border border-neutral-800 text-white px-3 py-2 rounded-lg transition-colors group">
                     <div className="flex items-center gap-3 overflow-hidden">
                         <div className="w-8 h-8 rounded-md bg-white text-black flex items-center justify-center font-bold shrink-0 overflow-hidden border border-neutral-700">
                             {activeProject?.logo ? (

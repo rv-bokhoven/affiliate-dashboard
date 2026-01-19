@@ -9,7 +9,7 @@ interface PageContainerProps {
 
 export default function PageContainer({ title, subtitle, actions, children }: PageContainerProps) {
   return (
-    <main className="min-h-screen bg-neutral-950 p-8 w-full">
+    <main className="min-h-screen bg-neutral-800 p-8 w-full">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* HEADER SECTION - Altijd hetzelfde op elke pagina */}

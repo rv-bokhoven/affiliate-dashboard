@@ -10,7 +10,7 @@ import { nl } from 'date-fns/locale';
 import {
   ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { CalendarDays, ArrowUpRight, ArrowDownRight, Info, ChevronDown, Check } from 'lucide-react';
+import { CalendarDays, ArrowUpRight, ArrowDownRight, Info, ChevronDown, Check, AlertTriangle } from 'lucide-react';
 import PageContainer from './PageContainer';
 
 registerLocale('nl', nl);
@@ -54,14 +54,19 @@ interface DashboardClientProps {
       sales: number; 
       revShare: number; 
   };
+  // NIEUW: Trends object voor vorige periode data
+  trends: {
+      revenue: number;
+      profit: number;
+      spend: number;
+  };
   campaignName: string; 
   campaignType: string;
-  // NIEUWE PROPS VOOR VALUTA
   currencySymbol: string;
   currentCurrency: string;
 }
 
-// --- Datum Filter Dropdown ---
+// ... DateFilter component stays exactly the same ...
 function DateFilter({ value, onChange }: { value: string, onChange: (val: string) => void }) {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -121,7 +126,7 @@ function DateFilter({ value, onChange }: { value: string, onChange: (val: string
 }
 
 export default function DashboardClient({ 
-    data, topOffers, capOffers, totals, campaignName, campaignType,
+    data, topOffers, capOffers, totals, trends, campaignName, campaignType,
     currencySymbol, currentCurrency 
 }: DashboardClientProps) {
   
@@ -133,7 +138,6 @@ export default function DashboardClient({
   const [startDate, endDate] = dateRange;
   const [chartType, setChartType] = useState<'line' | 'heatmap'>('line');
 
-  // Helper voor het formatteren van prijzen op basis van de gekozen valuta
   const formatMoney = (amount: number) => {
       return new Intl.NumberFormat('en-US', { 
           style: 'currency', 
@@ -155,7 +159,6 @@ export default function DashboardClient({
       router.replace(`/?${params.toString()}`, { scroll: false }); 
   };
   
-  // Toggle Valuta Functie
   const toggleCurrency = () => {
       const params = new URLSearchParams(searchParams);
       const newCurrency = currentCurrency === 'USD' ? 'EUR' : 'USD';
@@ -167,20 +170,30 @@ export default function DashboardClient({
   const handleCustomDateApply = () => { if (!startDate || !endDate) return; const params = new URLSearchParams(searchParams); params.set('range', 'custom'); params.set('from', toLocalYMD(startDate)); params.set('to', toLocalYMD(endDate)); router.push(`/?${params.toString()}`); };
   const getPercent = (part: number, total: number) => total === 0 ? '0' : ((part / total) * 100).toFixed(0);
 
+  // Helper functie om trend te berekenen
+  const calculateTrend = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? { diff: 100, label: 'New' } : { diff: 0, label: '0%' };
+      const diff = ((current - previous) / Math.abs(previous)) * 100;
+      return { diff, label: `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%` };
+  };
+
+  const revenueTrend = calculateTrend(totals.revenue, trends.revenue);
+  const profitTrend = calculateTrend(totals.profit, trends.profit);
+  // const spendTrend = calculateTrend(totals.spend, trends.spend); // Optioneel
+
   return (
     <PageContainer 
       title="Dashboard"
       subtitle={
         <div className="flex items-center gap-2">
             <span>Overview for <span className="text-neutral-100 font-medium">{campaignName}</span></span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${campaignType === 'SEO' ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'}`}>
+            <span className={`text-[10px] px-2 py-0.5 rounded mb-1 ${campaignType === 'SEO' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'}`}>
                 {campaignType}
             </span>
         </div>
       }
       actions={
         <div className="flex items-center gap-3">
-            {/* VALUTA TOGGLE */}
             <button 
                 onClick={toggleCurrency}
                 className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition shadow-sm h-[38px]"
@@ -192,8 +205,6 @@ export default function DashboardClient({
                 </div>
                 <span className={currentCurrency === 'USD' ? 'text-white font-bold' : 'text-neutral-500'}>$</span>
             </button>
-
-            {/* DATE FILTER */}
             <DateFilter value={currentFilter} onChange={handleFilterChange} />
         </div>
       }
@@ -219,10 +230,11 @@ export default function DashboardClient({
                 <StatsCard title="Total Leads" value={totals.leads.toString()} trend="neutral" />
                 <StatsCard title="Total Sales" value={totals.sales.toString()} trend="positive" />
                 <StatsCard title="RevShare" value={formatMoney(totals.revShare)} trend="neutral" />
-                <StatsCard title="Total Revenue" value={formatMoney(totals.revenue)} trend="positive" />
+                <StatsCard title="Total Revenue" value={formatMoney(totals.revenue)} trend={revenueTrend.diff >= 0 ? 'positive' : 'negative'} trendLabel={revenueTrend.label} />
             </>
         ) : (
             <>
+                {/* Spend Card (Neutral - Hover Effect behouden) */}
                 <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-xl shadow-sm relative group overflow-visible">
                     <div className="flex justify-between items-start mb-2">
                         <p className="text-sm font-medium text-neutral-500">Total Spend</p>
@@ -252,16 +264,34 @@ export default function DashboardClient({
                     <h3 className="text-2xl font-bold text-neutral-100">{formatMoney(totals.spend)}</h3>
                 </div>
 
-                <StatsCard title="Total Revenue" value={formatMoney(totals.revenue)} trend="positive" />
-                <StatsCard title="Net Profit" value={formatMoney(totals.profit)} trend={totals.profit >= 0 ? 'positive' : 'negative'} />
-                <StatsCard title="ROI" value={`${totals.roi.toFixed(1)}%`} trend={totals.roi >= 0 ? 'positive' : 'negative'} />
+                {/* Revenue Card (Met Trend Badge) */}
+                <StatsCard 
+                    title="Total Revenue" 
+                    value={formatMoney(totals.revenue)} 
+                    trend={revenueTrend.diff >= 0 ? 'positive' : 'negative'} 
+                    trendLabel={revenueTrend.label}
+                />
+                
+                {/* Profit (Met Trend Badge) */}
+                <StatsCard 
+                    title="Net Profit" 
+                    value={formatMoney(totals.profit)} 
+                    trend={profitTrend.diff >= 0 ? 'positive' : 'negative'}
+                    trendLabel={profitTrend.label} 
+                />
+                
+                {/* ROI (Bestaande logica) */}
+                <StatsCard 
+                    title="ROI" 
+                    value={`${totals.roi.toFixed(1)}%`} 
+                    trend={totals.roi >= 0 ? 'positive' : 'negative'} 
+                />
             </>
         )}
       </div>
 
-      {/* 3. CHARTS & LISTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
-         <div className="lg:col-span-2 bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 flex flex-col">
+      {/* 3. CHART - FULL WIDTH */}
+      <div className="w-full bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 mb-6">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold text-neutral-200">{chartType === 'line' ? 'Performance Overview' : 'Profit Heatmap'}</h3>
                 <div className="flex gap-4">
@@ -278,7 +308,8 @@ export default function DashboardClient({
                     )}
                 </div>
             </div>
-            <div className="flex-1 w-full min-h-0">
+            
+            <div className="w-full h-[350px]">
                 {data.length > 0 ? (
                     chartType === 'line' ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -295,13 +326,12 @@ export default function DashboardClient({
                             <Tooltip 
                                 contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', color: '#f5f5f5', borderRadius: '8px' }} 
                                 labelFormatter={(label) => new Date(label).toLocaleDateString('nl-NL')}
-                            formatter={(value: any, name: string) => { // Type 'any' of 'number | null' is hier handig
-                                if (value === null) return ['-', name]; // <--- Veiligheidscheck
-
-                                if (name === 'Revenue' || name === 'Costs') return [formatMoney(value), name];
-                                if (name === 'ROI %') return [`${value.toFixed(2)}%`, name];
-                                return [value, name];
-                            }}
+                                formatter={(value: any, name: string) => { 
+                                    if (value === null) return ['-', name]; 
+                                    if (name === 'Revenue' || name === 'Costs') return [formatMoney(value), name];
+                                    if (name === 'ROI %') return [`${value.toFixed(2)}%`, name];
+                                    return [value, name];
+                                }}
                             />
                             <Legend />
                             {campaignType === 'SEO' ? (
@@ -322,47 +352,88 @@ export default function DashboardClient({
                     ) : <Heatmap data={data} currencySymbol={currencySymbol} />
                 ) : <div className="h-full flex items-center justify-center text-neutral-500">Geen data beschikbaar.</div>}
             </div>
-         </div>
+      </div>
 
-         <div className="lg:col-span-1 bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 flex flex-col overflow-hidden">
-            <h3 className="text-lg font-semibold text-neutral-200 mb-4">Offer Performance</h3>
-            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-                <div className="mb-8"><CapMonitor offers={capOffers} formatMoney={formatMoney} /></div>
-                <div>
-                    <h4 className="text-xs font-bold text-neutral-500 uppercase mb-3">Toplist</h4>
-                    <div className="space-y-2">
-                        {topOffers.map((offer, index) => (
-                            // <--- AANPASSING: URL Parameters (filters) meesturen in de link
-                            <Link href={`/offers/${offer.id}?${searchParams.toString()}`} key={offer.id} className="block group">
-                                <div className="flex items-center justify-between p-3 rounded-lg hover:bg-neutral-800/50 border border-transparent hover:border-neutral-800 transition-all cursor-pointer">
-                                    <div className="flex items-center gap-3">
-                                        <span className={`flex items-center justify-center w-6 h-6 rounded text-xs font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' : index === 1 ? 'bg-neutral-500/20 text-neutral-400' : index === 2 ? 'bg-orange-500/20 text-orange-500' : 'text-neutral-600'}`}>{index + 1}</span>
-                                        <div><p className="text-sm font-medium text-neutral-200 truncate max-w-[120px] group-hover:text-blue-400 transition-colors">{offer.name}</p><p className="text-xs text-neutral-500">{offer.leads} Leads - {offer.sales} Sales</p></div>
-                                    </div>
-                                    <div className="text-right"><p className="text-sm font-bold text-neutral-100">{formatMoney(offer.revenue)}</p></div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
+      {/* 4. CAP MONITOR & OFFER TABLE */}
+      <div className="w-full space-y-6">
+          {capOffers.length > 0 && (
+             <CapMonitor offers={capOffers} formatMoney={formatMoney} />
+          )}
+
+          <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6">
+            <h3 className="text-lg font-semibold text-neutral-200 mb-4">Top Offers</h3>
+            <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-neutral-400">
+                    <thead className="bg-neutral-900/50 text-xs uppercase font-medium text-neutral-500 border-b border-neutral-800">
+                        <tr>
+                            <th className="px-4 py-3 font-semibold">Rank</th>
+                            <th className="px-4 py-3 font-semibold">Offer Name</th>
+                            <th className="px-4 py-3 font-semibold text-right">Leads</th>
+                            <th className="px-4 py-3 font-semibold text-right">Sales</th>
+                            <th className="px-4 py-3 font-semibold text-right">Total Revenue</th>
+                            <th className="px-4 py-3 font-semibold text-right">Share</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-800">
+                        {topOffers.map((offer, index) => {
+                            const sharePercent = totals.revenue > 0 ? (offer.revenue / totals.revenue) * 100 : 0;
+                            return (
+                                <tr key={offer.id} className="hover:bg-neutral-800/30 transition-colors group">
+                                    <td className="px-4 py-3">
+                                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' : index === 1 ? 'bg-neutral-500/20 text-neutral-400' : index === 2 ? 'bg-orange-500/20 text-orange-500' : 'text-neutral-600'}`}>
+                                            {index + 1}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <Link href={`/offers/${offer.id}?${searchParams.toString()}`} className="text-neutral-200 font-medium hover:text-blue-400 hover:underline decoration-blue-400/50 underline-offset-4 transition-all">
+                                            {offer.name}
+                                        </Link>
+                                    </td>
+                                    <td className="px-4 py-3 text-right text-neutral-300 font-mono">{offer.leads}</td>
+                                    <td className="px-4 py-3 text-right text-neutral-300 font-mono">{offer.sales}</td>
+                                    <td className="px-4 py-3 text-right text-white font-bold font-mono">{formatMoney(offer.revenue)}</td>
+                                    <td className="px-4 py-3 text-right">
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="text-xs font-bold text-neutral-300">{sharePercent.toFixed(1)}%</span>
+                                            <div className="w-16 h-1 bg-neutral-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${Math.min(sharePercent, 100)}%` }}></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                        {topOffers.length === 0 && (
+                            <tr>
+                                <td colSpan={6} className="px-4 py-8 text-center text-neutral-600 italic">Geen offers gevonden in deze periode.</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
-         </div>
+          </div>
       </div>
     </PageContainer>
   );
 }
 
-// ... Hulpcomponenten (StatsCard, CapMonitor, Heatmap) blijven ongewijzigd ...
-function StatsCard({ title, value, trend }: { title: string, value: string, trend?: 'positive' | 'negative' | 'neutral' }) {
+// --- HULPCOMPONENTEN ---
+
+function StatsCard({ title, value, trend, trendLabel }: { title: string, value: string, trend?: 'positive' | 'negative' | 'neutral', trendLabel?: string }) {
+    // Kleur waarde op basis van trend (zoals je wilde)
+    const valueColor = trend === 'positive' ? 'text-green-500' : trend === 'negative' ? 'text-red-500' : 'text-neutral-100';
+
     return (
         <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-xl shadow-sm hover:border-neutral-700 transition-colors flex flex-col justify-between h-full">
             <p className="text-sm font-medium text-neutral-500 mb-2">{title}</p>
             <div className="flex items-end justify-between">
                 <h3 className="text-2xl font-bold text-neutral-100">{value}</h3>
-                {trend && trend !== 'neutral' && (
-                    <span className={`flex items-center px-2 py-1 rounded-full text-xs font-medium border ${trend === 'positive' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
+                
+                {/* Toon Badge met percentage als trendLabel aanwezig is */}
+                {trend && trendLabel && (
+                    <span className={`flex items-center px-2 py-1 rounded mb-1 text-xs font-medium ${trend === 'positive' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                         {trend === 'positive' ? <ArrowUpRight size={12} className="mr-1"/> : <ArrowDownRight size={12} className="mr-1"/>}
-                        {trend === 'positive' ? '+12%' : '-4%'}
+                        {trendLabel}
                     </span>
                 )}
             </div>
@@ -373,33 +444,23 @@ function StatsCard({ title, value, trend }: { title: string, value: string, tren
 function CapMonitor({ offers, formatMoney }: { offers: TopOffer[], formatMoney: (val: number) => string }) {
     if (!offers || offers.length === 0) return null;
     return (
-      <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 shadow-inner">
-        <div className="flex items-center gap-2 mb-4 border-b border-neutral-800 pb-2">
-          <span className="text-base">⚠️</span>
-          <div><h2 className="text-xs font-bold text-neutral-300 uppercase tracking-wide">Cap Monitor</h2></div>
+      <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <AlertTriangle size={18} className="text-orange-500" />
+          <h2 className="text-base font-bold text-neutral-200">Active Cap Monitors</h2>
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {offers.map(offer => {
-            let percent = 0; let current = 0; let max = 0; let label = '';
-            if (offer.capLeads) { 
-                current = offer.leads; 
-                max = offer.capLeads; 
-                percent = (current / max) * 100; 
-                label = `${current} / ${max} Leads`; 
-            } 
-            else if (offer.capRevenue) { 
-                current = offer.revenue; 
-                max = offer.capRevenue; 
-                percent = (current / max) * 100; 
-                label = `${formatMoney(current)} / ${formatMoney(max)}`; 
-            }
+            let percent = 0; let current = 0; let max = 0; let label = ''; let capType = '';
+            if (offer.capLeads) { current = offer.leads; max = offer.capLeads; percent = (current / max) * 100; label = `${current} / ${max}`; capType = 'Leads Cap'; } 
+            else if (offer.capRevenue) { current = offer.revenue; max = offer.capRevenue; percent = (current / max) * 100; label = `${formatMoney(current)} / ${formatMoney(max)}`; capType = 'Revenue Cap'; }
             let barColor = 'bg-blue-600'; let textColor = 'text-blue-400';
             if (percent >= 100) { barColor = 'bg-red-500'; textColor = 'text-red-400'; } else if (percent >= 85) { barColor = 'bg-orange-500'; textColor = 'text-orange-400'; }
             return (
-              <div key={offer.id}>
-                <div className="flex justify-between items-center mb-1.5"><span className="font-medium text-neutral-400 text-xs truncate pr-2 max-w-[150px]" title={offer.name}>{offer.name}</span><span className={`text-xs font-bold ${textColor}`}>{percent.toFixed(0)}%</span></div>
-                <div className="w-full bg-neutral-800 rounded-full h-1.5 mb-1 overflow-hidden"><div className={`h-full rounded-full transition-all duration-1000 ${barColor}`} style={{ width: `${Math.min(percent, 100)}%` }}></div></div>
-                <div className="text-[10px] text-neutral-600 text-right font-mono">{label}</div>
+              <div key={offer.id} className="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
+                <div className="flex justify-between items-start mb-2"><div className="overflow-hidden"><span className="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-0.5">{capType}</span><h4 className="font-medium text-neutral-300 text-sm truncate" title={offer.name}>{offer.name}</h4></div><span className={`text-sm font-bold ${textColor}`}>{percent.toFixed(0)}%</span></div>
+                <div className="w-full bg-neutral-800 rounded-full h-2 mb-2 overflow-hidden"><div className={`h-full rounded-full transition-all duration-1000 ${barColor}`} style={{ width: `${Math.min(percent, 100)}%` }}></div></div>
+                <div className="flex justify-between items-center text-xs"><span className="text-neutral-500">{offer.network}</span><span className="text-neutral-300 font-mono font-medium">{label}</span></div>
               </div>
             );
           })}

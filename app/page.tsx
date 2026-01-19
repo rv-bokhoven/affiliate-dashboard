@@ -10,7 +10,7 @@ import {
   startOfYear, endOfYear, 
   parseISO, format, 
   endOfDay as dateFnsEndOfDay,
-  subDays, startOfDay
+  subDays, startOfDay, subYears // <--- subYears toegevoegd
 } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -34,6 +34,40 @@ function getDateRange(range: string, from?: string, to?: string) {
   if (range === 'all') return { start: new Date('2020-01-01'), end: getEndOfDay(now) };
   return { start: startOfMonth(now), end: getEndOfDay(endOfMonth(now)) };
 }
+
+// NIEUW: Functie om de vorige periode te bepalen voor trends
+function getPreviousDateRange(range: string, currentStart: Date, currentEnd: Date) {
+  const diff = currentEnd.getTime() - currentStart.getTime();
+  
+  if (range === 'yesterday') {
+      const prev = subDays(currentStart, 1);
+      return { start: startOfDay(prev), end: endOfDay(prev) };
+  }
+  if (range === 'this_week' || range === 'last_week') {
+      const prevStart = subWeeks(currentStart, 1);
+      const prevEnd = subWeeks(currentEnd, 1);
+      return { start: prevStart, end: prevEnd };
+  }
+  if (range === 'this_month' || range === 'last_month') {
+      const prevStart = subMonths(currentStart, 1);
+      const prevEnd = subMonths(currentEnd, 1);
+      return { start: prevStart, end: prevEnd };
+  }
+  if (range === 'this_year') {
+      const prevStart = subYears(currentStart, 1);
+      const prevEnd = subYears(currentEnd, 1);
+      return { start: prevStart, end: prevEnd };
+  }
+
+  // Fallback (Custom): Schuif datums terug met dezelfde duur
+  return { 
+      start: new Date(currentStart.getTime() - diff), 
+      end: new Date(currentEnd.getTime() - diff) 
+  };
+}
+// Hulpfunctie endOfDay (duplicate fix, zat al bovenin maar voor zekerheid binnen scope prevRange)
+function endOfDay(date: Date) { return dateFnsEndOfDay(date); }
+
 
 function getGroupKey(date: Date, interval: string) {
   if (interval === 'month') return format(startOfMonth(date), 'yyyy-MM-dd');
@@ -103,7 +137,7 @@ export default async function Page({
   const hasAccess = allowedCampaigns.find(c => c.id === requestedId);
   const campaignId = hasAccess ? requestedId : allowedCampaigns[0].id;
 
-  // --- DATA OPHALEN ---
+  // --- DATA OPHALEN (HUIDIGE PERIODE) ---
 
   const { range, from, to, interval } = params;
   const { start, end } = getDateRange(range || 'yesterday', from, to);
@@ -129,7 +163,22 @@ export default async function Page({
 
   if (!campaign) return <div className="p-10 text-white">Geen data geladen.</div>;
 
-  // --- BEREKENINGEN ---
+  // --- DATA OPHALEN (VORIGE PERIODE VOOR TRENDS) ---
+  const prevRange = getPreviousDateRange(range || 'yesterday', start, end);
+  
+  const prevCampaignData = await prisma.campaign.findUnique({
+      where: { id: campaignId },
+      include: {
+          dailySpends: { where: { date: { gte: prevRange.start, lte: prevRange.end } } },
+          offers: {
+              include: { conversions: { where: { date: { gte: prevRange.start, lte: prevRange.end } } } }
+          },
+          adjustments: { where: { date: { gte: prevRange.start, lte: prevRange.end } } }
+      }
+  });
+
+
+  // --- BEREKENINGEN (HUIDIGE PERIODE) ---
 
   let totalSpend = 0;
   let googleSpend = 0;
@@ -158,8 +207,8 @@ export default async function Page({
   
   // 2. Verwerk OFFERS
   const processedTopOffers = campaign.offers.map(offer => {
-    let offerConversionRevenue = 0; // Omzet uit leads/sales
-    let offerAdjustmentRevenue = 0; // Omzet uit RevShare voor dit offer
+    let offerConversionRevenue = 0; 
+    let offerAdjustmentRevenue = 0; 
     
     // A. Leads & Sales
     const offerCurrency = offer.currency || 'USD';
@@ -177,7 +226,7 @@ export default async function Page({
       leads += conv.leads;
       sales += conv.sales;
 
-      // Update Chart & Global Total met conversies
+      // Update Chart
       const key = getGroupKey(conv.date, currentInterval);
       const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
       
@@ -189,12 +238,10 @@ export default async function Page({
       });
     });
 
-    // Voeg conversie omzet toe aan TOTAAL (maar niet adjustments, dat doet stap 3)
     totalRevenue += offerConversionRevenue;
     totalLeads += leads;
     totalSales += sales;
 
-    // B. Specifieke RevShare voor dit offer (voor de Toplijst)
     const offerAdjustments = campaign.adjustments.filter(adj => adj.offerId === offer.id);
     offerAdjustments.forEach(adj => {
         const val = convert(adj.amount, adj.currency, adj.exchangeRate);
@@ -207,23 +254,16 @@ export default async function Page({
       network: offer.network?.name || 'Unknown',
       leads,
       sales,
-      // HIER TELLEN WE ALLES OP: Zodat de lijst de volledige waarde toont
       revenue: offerConversionRevenue + offerAdjustmentRevenue 
     };
   });
 
-  // OPMERKING: We berekenen totalRevenue nu incrementeel hierboven en hieronder,
-  // in plaats van processedTopOffers.reduce te gebruiken. Dit voorkomt dubbeltellingen.
-
-  // 3. Verwerk ADJUSTMENTS / REVSHARE (Voor Global Total & Chart)
+  // 3. Verwerk ADJUSTMENTS / REVSHARE
   campaign.adjustments.forEach(adj => {
     const value = convert(adj.amount, adj.currency, adj.exchangeRate);
-
-    // Voeg toe aan globale totalen
     totalRevenue += value;
     totalRevShare += value;
     
-    // Voeg toe aan grafiek
     const key = getGroupKey(adj.date, currentInterval);
     const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
     chartMap.set(key, { ...current, revenue: current.revenue + value });
@@ -232,11 +272,39 @@ export default async function Page({
   const profit = totalRevenue - totalSpend;
   const roi = totalSpend > 0 ? (profit / totalSpend) * 100 : 0;
 
-  const chartData = Array.from(chartMap.entries())
-.map(([date, vals]) => {
-      // Check of er activiteit is (Spend of Revenue)
-      const hasActivity = vals.spend !== 0 || vals.revenue !== 0;
+  // --- BEREKENINGEN (VORIGE PERIODE VOOR TRENDS) ---
+  let prevRevenue = 0;
+  let prevSpend = 0;
 
+  if (prevCampaignData) {
+      // Prev Spend
+      prevCampaignData.dailySpends.forEach(s => {
+          prevSpend += convert(s.amount, s.currency, s.exchangeRate);
+      });
+
+      // Prev Revenue (Offers)
+      prevCampaignData.offers.forEach(o => {
+        const oRate = o.currency === 'EUR' ? EUR_USD_RATE : 1.0;
+        const payLead = convert(o.payoutLead, o.currency || 'USD', oRate);
+        const paySale = convert(o.payoutSale, o.currency || 'USD', oRate);
+        
+        o.conversions.forEach(c => {
+            prevRevenue += (c.leads * payLead) + (c.sales * paySale);
+        });
+      });
+
+      // Prev Revenue (Adjustments)
+      prevCampaignData.adjustments.forEach(a => {
+          prevRevenue += convert(a.amount, a.currency, a.exchangeRate);
+      });
+  }
+  const prevProfit = prevRevenue - prevSpend;
+
+  // --- CHART DATA FORMATTING ---
+
+  const chartData = Array.from(chartMap.entries())
+    .map(([date, vals]) => {
+      const hasActivity = vals.spend !== 0 || vals.revenue !== 0;
       return {
         date,
         spend: vals.spend,
@@ -244,9 +312,6 @@ export default async function Page({
         leads: vals.leads, 
         sales: vals.sales, 
         profit: vals.revenue - vals.spend,
-        
-        // DE FIX: Als er geen activiteit is, is ROI 'null' (breekt de lijn).
-        // Is er wel activiteit? Dan berekenen we de ROI (of 0 als spend 0 is).
         roi: hasActivity 
              ? (vals.spend > 0 ? ((vals.revenue - vals.spend) / vals.spend) * 100 : 0)
              : null
@@ -255,7 +320,7 @@ export default async function Page({
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const topOffers = processedTopOffers
-    .filter(o => o.revenue > 0) // Nu pakt hij dus ook offers die alleen revshare hebben!
+    .filter(o => o.revenue > 0)
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 10);
 
@@ -311,6 +376,12 @@ export default async function Page({
       totals={{ 
         spend: totalSpend, revenue: totalRevenue, profit, roi, 
         googleSpend, microsoftSpend, leads: totalLeads, sales: totalSales, revShare: totalRevShare
+      }}
+      // NIEUWE PROP:
+      trends={{
+          revenue: prevRevenue,
+          profit: prevProfit,
+          spend: prevSpend
       }}
       campaignName={campaign.name}
       campaignType={campaign.type || 'PAID'} 
