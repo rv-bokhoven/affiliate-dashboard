@@ -8,9 +8,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import { registerLocale } from "react-datepicker";
 import { nl } from 'date-fns/locale';
 import {
-  ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  ReferenceLine
 } from 'recharts';
-import { CalendarDays, ArrowUpRight, ArrowDownRight, Info, ChevronDown, Check, AlertTriangle } from 'lucide-react';
+import { CalendarDays, ArrowUpRight, ArrowDownRight, Info, ChevronDown, Check, AlertTriangle, MessageSquare } from 'lucide-react';
 import PageContainer from './PageContainer';
 
 registerLocale('nl', nl);
@@ -59,6 +60,7 @@ interface DashboardClientProps {
       profit: number;
       spend: number;
   };
+  annotations: { id: number; date: string; text: string }[];
   campaignName: string; 
   campaignType: string;
   currencySymbol: string;
@@ -124,9 +126,74 @@ function DateFilter({ value, onChange }: { value: string, onChange: (val: string
     );
 }
 
+// --- Custom Tooltip Component ---
+const CustomTooltip = ({ active, payload, label, annotations, formatMoney }: any) => {
+    if (!active || !payload || !payload.length) return null;
+
+    const dataPoint = payload[0].payload;
+    const note = annotations.find((n: any) => n.date === label);
+
+    return (
+        <div className="bg-[#171717] border border-[#262626] rounded-lg p-3 shadow-xl max-w-[250px] z-50">
+            <p className="text-neutral-200 font-bold mb-2 border-b border-neutral-800 pb-1">
+                {new Date(label).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+            
+            <div className="space-y-1">
+                {payload.map((entry: any) => (
+                    <div key={entry.name} className="flex justify-between items-center gap-4 text-xs">
+                        <div className="flex items-center gap-2">
+                            {/* Gebruik gradient icoontje voor ROI of vaste kleur voor de rest */}
+                            <div 
+                                className="w-2 h-2 rounded-full" 
+                                style={{ 
+                                    background: entry.name.includes('ROI') 
+                                        ? 'linear-gradient(180deg, #10b981 0%, #ef4444 100%)' 
+                                        : entry.color 
+                                }} 
+                            />
+                            <span className="text-neutral-400">{entry.name}</span>
+                        </div>
+                        <span className="text-white font-mono font-medium">
+                            {entry.name.includes('ROI') 
+                                ? `${entry.value.toFixed(1)}%` 
+                                : formatMoney(entry.value)}
+                        </span>
+                    </div>
+                ))}
+
+                {/* Net Profit Regel */}
+                <div className="flex justify-between items-center gap-4 text-xs pt-1 mt-1 border-t border-dashed border-neutral-800">
+                    <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${dataPoint.profit >= 0 ? 'bg-green-500' : 'bg-red-500'}`} />
+                        <span className="text-neutral-400">Net Profit</span>
+                    </div>
+                    <span className={`font-mono font-bold ${dataPoint.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {formatMoney(dataPoint.profit)}
+                    </span>
+                </div>
+            </div>
+
+            {note && (
+                <div className="mt-3 pt-2 border-t border-neutral-800 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex items-start gap-2">
+                        <MessageSquare size={14} className="text-blue-400 mt-0.5 shrink-0" />
+                        <div>
+                            <span className="text-[10px] uppercase font-bold text-blue-400 block mb-0.5">Annotatie</span>
+                            <p className="text-xs text-neutral-300 italic leading-relaxed">
+                                "{note.text}"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 export default function DashboardClient({ 
-    data, topOffers, capOffers, totals, trends, campaignName, campaignType,
-    currencySymbol, currentCurrency 
+    data, topOffers, capOffers, totals, trends, annotations,
+    campaignName, campaignType, currencySymbol, currentCurrency 
 }: DashboardClientProps) {
   
   const router = useRouter();
@@ -136,6 +203,36 @@ export default function DashboardClient({
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [startDate, endDate] = dateRange;
   const [chartType, setChartType] = useState<'line' | 'heatmap'>('line');
+
+  // --- NIEUW: Bereken het omslagpunt voor de gradient ---
+  const gradientOffset = () => {
+    if (!data || data.length === 0) return 0;
+    
+    // Zoek max en min ROI
+    const dataMax = Math.max(...data.map((i) => i.roi || 0));
+    const dataMin = Math.min(...data.map((i) => i.roi || 0));
+  
+    // Als alles positief is: offset = 1 (helemaal groen)
+    if (dataMax <= 0) return 0;
+    // Als alles negatief is: offset = 0 (helemaal rood)
+    if (dataMin >= 0) return 1;
+  
+    // Anders: bereken percentage waar '0' ligt
+    return dataMax / (dataMax - dataMin);
+  };
+  
+  const off = gradientOffset();
+
+  // DEBUGGING
+  useEffect(() => {
+    if (annotations.length > 0 && data.length > 0) {
+        // console.log("--- DEBUG ANNOTATIONS ---");
+        // annotations.forEach(note => {
+        //     const match = data.find(d => d.date === note.date);
+        //     if(!match) console.log(`❌ GEEN MATCH voor ${note.date}`);
+        // });
+    }
+  }, [annotations, data]);
 
   const formatMoney = (amount: number) => {
       return new Intl.NumberFormat('en-US', { 
@@ -169,7 +266,6 @@ export default function DashboardClient({
   const handleCustomDateApply = () => { if (!startDate || !endDate) return; const params = new URLSearchParams(searchParams); params.set('range', 'custom'); params.set('from', toLocalYMD(startDate)); params.set('to', toLocalYMD(endDate)); router.push(`/?${params.toString()}`); };
   const getPercent = (part: number, total: number) => total === 0 ? '0' : ((part / total) * 100).toFixed(0);
 
-  // Helper functie om trend te berekenen
   const calculateTrend = (current: number, previous: number) => {
       if (previous === 0) return current > 0 ? { diff: 100, label: 'New' } : { diff: 0, label: '0%' };
       const diff = ((current - previous) / Math.abs(previous)) * 100;
@@ -232,7 +328,6 @@ export default function DashboardClient({
             </>
         ) : (
             <>
-                {/* Spend Card (Neutral - Hover Effect behouden) */}
                 <div className="bg-neutral-900/50 border border-neutral-800 p-4 md:p-6 rounded-xl shadow-sm relative group overflow-visible">
                     <div className="flex justify-between items-start mb-2">
                         <p className="text-sm font-medium text-neutral-500">Total Spend</p>
@@ -262,7 +357,6 @@ export default function DashboardClient({
                     <h3 className="text-2xl font-bold text-neutral-100">{formatMoney(totals.spend)}</h3>
                 </div>
 
-                {/* Revenue Card (Met Trend Badge) */}
                 <StatsCard 
                     title="Total Revenue" 
                     value={formatMoney(totals.revenue)} 
@@ -270,7 +364,6 @@ export default function DashboardClient({
                     trendLabel={revenueTrend.label}
                 />
                 
-                {/* Profit (Met Trend Badge) */}
                 <StatsCard 
                     title="Net Profit" 
                     value={formatMoney(totals.profit)} 
@@ -278,7 +371,6 @@ export default function DashboardClient({
                     trendLabel={profitTrend.label} 
                 />
                 
-                {/* ROI (Bestaande logica) */}
                 <StatsCard 
                     title="ROI" 
                     value={`${totals.roi.toFixed(1)}%`} 
@@ -288,10 +380,8 @@ export default function DashboardClient({
         )}
       </div>
 
-      {/* 3. CHART - FULL WIDTH */}
-      {/* FIX: p-4 op mobile, p-6 op desktop voor meer ruimte */}
-      <div className="w-full bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6 mb-6">
-            {/* FIX: flex-col op mobiel zodat de knoppen niet buiten beeld vallen */}
+      {/* 3. CHART */}
+      <div className="w-full bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6 mb-6 min-w-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h3 className="text-lg font-semibold text-neutral-200">{chartType === 'line' ? 'Performance Overview' : 'Profit Heatmap'}</h3>
                 <div className="flex gap-4 self-end sm:self-auto">
@@ -309,32 +399,38 @@ export default function DashboardClient({
                 </div>
             </div>
             
-            {/* FIX: min-w-0 toegevoegd om chart overflow te voorkomen */}
-            <div className="w-full h-[350px] min-w-0">
+            <div className="relative w-full h-[400px]">
                 {data.length > 0 ? (
                     chartType === 'line' ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <ComposedChart data={data}>
+                            
+                            {/* --- GRADIENT DEFINITIE (NIEUW) --- */}
+                            <defs>
+                                <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset={off} stopColor="#10b981" stopOpacity={1} /> {/* Groen (Top) */}
+                                    <stop offset={off} stopColor="#ef4444" stopOpacity={1} /> {/* Rood (Bottom) */}
+                                </linearGradient>
+                            </defs>
+
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#262626" />
+                            
                             <XAxis 
                                 dataKey="date" 
                                 stroke="#525252" 
                                 tick={{fill: '#737373', fontSize: 12}} 
                                 tickFormatter={(val) => { const d = new Date(val); if (currentInterval === 'month') return d.toLocaleDateString('nl-NL', { month: 'short', year: '2-digit' }); return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'numeric' }); }} 
                             />
+                            
                             <YAxis yAxisId="left" stroke="#525252" tick={{fill: '#737373', fontSize: 12}} tickFormatter={(val) => `${currencySymbol}${val}`} />
                             <YAxis yAxisId="right" orientation="right" stroke="#525252" unit={campaignType === 'SEO' ? '' : '%'} tick={{fill: '#737373', fontSize: 12}} />
+                            
                             <Tooltip 
-                                contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', color: '#f5f5f5', borderRadius: '8px' }} 
-                                labelFormatter={(label) => new Date(label).toLocaleDateString('nl-NL')}
-                                formatter={(value: any, name: string) => { 
-                                    if (value === null) return ['-', name]; 
-                                    if (name === 'Revenue' || name === 'Costs') return [formatMoney(value), name];
-                                    if (name === 'ROI %') return [`${value.toFixed(2)}%`, name];
-                                    return [value, name];
-                                }}
+                                content={<CustomTooltip annotations={annotations} formatMoney={formatMoney} />}
+                                cursor={{ fill: '#ffffff', opacity: 0.05 }}
                             />
                             <Legend />
+
                             {campaignType === 'SEO' ? (
                                 <>
                                     <Bar yAxisId="left" dataKey="leads" name="Leads" fill="#eab308" radius={[4, 4, 0, 0]} maxBarSize={50} />
@@ -345,9 +441,44 @@ export default function DashboardClient({
                                 <>
                                     <Bar yAxisId="left" dataKey="revenue" name="Revenue" fill="#FF5F00" radius={[4, 4, 0, 0]} maxBarSize={50} />
                                     <Bar yAxisId="left" dataKey="spend" name="Costs" fill="#E6E6E6" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                                    <Line yAxisId="right" type="monotone" dataKey="roi" name="ROI %" stroke="#10b981" strokeWidth={4} dot={false} />
+                                    <Line 
+                                        yAxisId="right" 
+                                        type="monotone" 
+                                        dataKey="roi" 
+                                        name="ROI %" 
+                                        stroke="url(#splitColor)" // <--- HIER DE GRADIENT
+                                        strokeWidth={4} 
+                                        dot={false} 
+                                    />
                                 </>
                             )}
+
+                            {/* ANNOTATIES */}
+                            {annotations.map((note) => {
+                                const hasMatch = data.some(d => d.date === note.date);
+                                if (!hasMatch) return null;
+
+                                return (
+                                    <ReferenceLine 
+                                        key={note.id} 
+                                        x={note.date}
+                                        yAxisId="left"
+                                        stroke="#3b82f6" 
+                                        strokeDasharray="3 3"
+                                        isFront={true} 
+                                        ifOverflow="visible"
+                                        strokeWidth={2}
+                                        label={{ 
+                                            value: '!', 
+                                            position: 'insideTop', 
+                                            fill: '#3b82f6', 
+                                            fontSize: 16, 
+                                            fontWeight: 'bold',
+                                        }} 
+                                    />
+                                );
+                            })}
+                            
                             </ComposedChart>
                         </ResponsiveContainer>
                     ) : <Heatmap data={data} currencySymbol={currencySymbol} />
@@ -361,7 +492,6 @@ export default function DashboardClient({
              <CapMonitor offers={capOffers} formatMoney={formatMoney} />
           )}
 
-          {/* FIX: p-4 mobile */}
           <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6">
             <h3 className="text-lg font-semibold text-neutral-200 mb-4">Top Offers</h3>
             <div className="overflow-x-auto">
@@ -419,82 +549,10 @@ export default function DashboardClient({
   );
 }
 
-// --- HULPCOMPONENTEN ---
-
+// ... HULPCOMPONENTEN ...
 function StatsCard({ title, value, trend, trendLabel }: { title: string, value: string, trend?: 'positive' | 'negative' | 'neutral', trendLabel?: string }) {
-    const valueColor = trend === 'positive' ? 'text-green-500' : trend === 'negative' ? 'text-red-500' : 'text-neutral-100';
-
-    return (
-        // FIX: padding aangepast naar p-4 md:p-6
-        <div className="bg-neutral-900/50 border border-neutral-800 p-4 md:p-6 rounded-xl shadow-sm hover:border-neutral-700 transition-colors flex flex-col justify-between h-full">
-            <p className="text-sm font-medium text-neutral-500 mb-2">{title}</p>
-            <div className="flex items-end justify-between">
-                <h3 className="text-2xl font-bold text-neutral-100">{value}</h3>
-                
-                {trend && trendLabel && (
-                    <span className={`flex items-center px-2 py-1 rounded-full text-xs font-medium border ${trend === 'positive' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-red-500/10 border-red-500/20 text-red-500'}`}>
-                        {trend === 'positive' ? <ArrowUpRight size={12} className="mr-1"/> : <ArrowDownRight size={12} className="mr-1"/>}
-                        {trendLabel}
-                    </span>
-                )}
-            </div>
-        </div>
-    );
+    const valueColor = trend === 'positive' ? 'text-neutral-100' : trend === 'negative' ? 'text-neutral-100' : 'text-neutral-100';
+    return ( <div className="bg-neutral-900/50 border border-neutral-800 p-4 md:p-6 rounded-xl shadow-sm hover:border-neutral-700 transition-colors flex flex-col justify-between h-full"> <p className="text-sm font-medium text-neutral-500 mb-2">{title}</p> <div className="flex items-end justify-between"> <h3 className={`text-2xl font-bold ${valueColor}`}>{value}</h3> {trend && trendLabel && ( <span className={`flex items-center px-2 py-1 rounded mb-1 text-xs font-medium ${trend === 'positive' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}> {trend === 'positive' ? <ArrowUpRight size={12} className="mr-1"/> : <ArrowDownRight size={12} className="mr-1"/>} {trendLabel} </span> )} </div> </div> );
 }
-
-function CapMonitor({ offers, formatMoney }: { offers: TopOffer[], formatMoney: (val: number) => string }) {
-    if (!offers || offers.length === 0) return null;
-    return (
-      <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6 shadow-sm">
-        <div className="flex items-center gap-2 mb-4">
-          <AlertTriangle size={18} className="text-orange-500" />
-          <h2 className="text-base font-bold text-neutral-200">Active Cap Monitors</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {offers.map(offer => {
-            let percent = 0; let current = 0; let max = 0; let label = ''; let capType = '';
-            if (offer.capLeads) { current = offer.leads; max = offer.capLeads; percent = (current / max) * 100; label = `${current} / ${max}`; capType = 'Leads Cap'; } 
-            else if (offer.capRevenue) { current = offer.revenue; max = offer.capRevenue; percent = (current / max) * 100; label = `${formatMoney(current)} / ${formatMoney(max)}`; capType = 'Revenue Cap'; }
-            let barColor = 'bg-blue-600'; let textColor = 'text-blue-400';
-            if (percent >= 100) { barColor = 'bg-red-500'; textColor = 'text-red-400'; } else if (percent >= 85) { barColor = 'bg-orange-500'; textColor = 'text-orange-400'; }
-            return (
-              <div key={offer.id} className="bg-neutral-900 border border-neutral-800 p-4 rounded-lg">
-                <div className="flex justify-between items-start mb-2"><div className="overflow-hidden"><span className="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-0.5">{capType}</span><h4 className="font-medium text-neutral-300 text-sm truncate" title={offer.name}>{offer.name}</h4></div><span className={`text-sm font-bold ${textColor}`}>{percent.toFixed(0)}%</span></div>
-                <div className="w-full bg-neutral-800 rounded-full h-2 mb-2 overflow-hidden"><div className={`h-full rounded-full transition-all duration-1000 ${barColor}`} style={{ width: `${Math.min(percent, 100)}%` }}></div></div>
-                <div className="flex justify-between items-center text-xs"><span className="text-neutral-500">{offer.network}</span><span className="text-neutral-300 font-mono font-medium">{label}</span></div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-}
-
-function Heatmap({ data, currencySymbol }: { data: DashboardData[], currencySymbol: string }) {
-    if (!data || data.length === 0) return <div className="text-neutral-500">Geen data</div>;
-    const maxProfit = Math.max(...data.map(d => d.profit)); const minProfit = Math.min(...data.map(d => d.profit));
-    const formatDate = (dateStr: string) => { const d = new Date(dateStr); return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', weekday: 'short' }); };
-    const firstDate = new Date(data[0].date); const dayOfWeek = firstDate.getDay(); const emptySlots = dayOfWeek === 0 ? 6 : dayOfWeek - 1; const weekDays = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
-    return (
-      <div className="h-full flex flex-col overflow-hidden">
-        {/* FIX: gap verkleind voor mobiel (gap-1 md:gap-2) */}
-        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">{weekDays.map(day => <div key={day} className="text-[10px] text-neutral-500 font-medium text-center uppercase tracking-wider">{day}</div>)}</div>
-        <div className="grid grid-cols-7 gap-1 md:gap-2 overflow-y-auto pr-2 pb-10 content-start custom-scrollbar">
-          {Array.from({ length: emptySlots }).map((_, i) => <div key={`empty-${i}`} className="w-full aspect-square" />)}
-          {data.map((day, index) => {
-            const isProfit = day.profit >= 0; let opacity = 0.1;
-            if (isProfit && maxProfit > 0) opacity = 0.2 + (0.8 * (day.profit / maxProfit)); else if (!isProfit && minProfit < 0) opacity = 0.2 + (0.8 * (day.profit / minProfit));
-            const bgColor = isProfit ? `rgba(34, 197, 94, ${opacity})` : `rgba(239, 68, 68, ${opacity})`;
-            const borderColor = isProfit ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)';
-            const tooltipPosition = (index + emptySlots) < 7 ? "top-full mt-2" : "bottom-full mb-2";
-            return (
-              <div key={day.date} className="group relative">
-                <div className="w-full aspect-square rounded-md border flex items-center justify-center transition hover:scale-105 cursor-pointer" style={{ backgroundColor: bgColor, borderColor: borderColor }}><span className="text-[10px] font-medium text-white/80 drop-shadow-md">{new Date(day.date).getDate()}</span></div>
-                <div className={`absolute left-1/2 -translate-x-1/2 w-32 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-neutral-200 opacity-0 group-hover:opacity-100 pointer-events-none transition z-50 shadow-xl ${tooltipPosition}`}><p className="font-bold text-center border-b border-neutral-800 pb-1 mb-1">{formatDate(day.date)}</p><div className="flex justify-between"><span>Winst:</span><span className={day.profit >= 0 ? "text-green-400" : "text-red-400"}>{currencySymbol}{day.profit.toFixed(0)}</span></div><div className="flex justify-between text-neutral-500"><span>ROI:</span><span>{day.roi !== null ? day.roi.toFixed(0) : 0}%</span></div></div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-}
+function CapMonitor({ offers, formatMoney }: { offers: TopOffer[], formatMoney: (val: number) => string }) { if (!offers || offers.length === 0) return null; return ( <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-4 md:p-6 shadow-sm"> <div className="flex items-center gap-2 mb-4"> <AlertTriangle size={18} className="text-orange-500" /> <h2 className="text-base font-bold text-neutral-200">Active Cap Monitors</h2> </div> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"> {offers.map(offer => { let percent = 0; let current = 0; let max = 0; let label = ''; let capType = ''; if (offer.capLeads) { current = offer.leads; max = offer.capLeads; percent = (current / max) * 100; label = `${current} / ${max}`; capType = 'Leads Cap'; } else if (offer.capRevenue) { current = offer.revenue; max = offer.capRevenue; percent = (current / max) * 100; label = `${formatMoney(current)} / ${formatMoney(max)}`; capType = 'Revenue Cap'; } let barColor = 'bg-blue-600'; let textColor = 'text-blue-400'; if (percent >= 100) { barColor = 'bg-red-500'; textColor = 'text-red-400'; } else if (percent >= 85) { barColor = 'bg-orange-500'; textColor = 'text-orange-400'; } return ( <div key={offer.id} className="bg-neutral-900 border border-neutral-800 p-4 rounded-lg"> <div className="flex justify-between items-start mb-2"><div className="overflow-hidden"><span className="block text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-0.5">{capType}</span><h4 className="font-medium text-neutral-300 text-sm truncate" title={offer.name}>{offer.name}</h4></div><span className={`text-sm font-bold ${textColor}`}>{percent.toFixed(0)}%</span></div> <div className="w-full bg-neutral-800 rounded-full h-2 mb-2 overflow-hidden"><div className={`h-full rounded-full transition-all duration-1000 ${barColor}`} style={{ width: `${Math.min(percent, 100)}%` }}></div></div> <div className="flex justify-between items-center text-xs"><span className="text-neutral-500">{offer.network}</span><span className="text-neutral-300 font-mono font-medium">{label}</span></div> </div> ); })} </div> </div> ); }
+function Heatmap({ data, currencySymbol }: { data: DashboardData[], currencySymbol: string }) { if (!data || data.length === 0) return <div className="text-neutral-500">Geen data</div>; const maxProfit = Math.max(...data.map(d => d.profit)); const minProfit = Math.min(...data.map(d => d.profit)); const formatDate = (dateStr: string) => { const d = new Date(dateStr); return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', weekday: 'short' }); }; const firstDate = new Date(data[0].date); const dayOfWeek = firstDate.getDay(); const emptySlots = dayOfWeek === 0 ? 6 : dayOfWeek - 1; const weekDays = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']; return ( <div className="h-full flex flex-col overflow-hidden"> <div className="grid grid-cols-7 gap-1 md:gap-2 mb-2">{weekDays.map(day => <div key={day} className="text-[10px] text-neutral-500 font-medium text-center uppercase tracking-wider">{day}</div>)}</div> <div className="grid grid-cols-7 gap-1 md:gap-2 overflow-y-auto pr-2 pb-10 content-start custom-scrollbar"> {Array.from({ length: emptySlots }).map((_, i) => <div key={`empty-${i}`} className="w-full aspect-square" />)} {data.map((day, index) => { const isProfit = day.profit >= 0; let opacity = 0.1; if (isProfit && maxProfit > 0) opacity = 0.2 + (0.8 * (day.profit / maxProfit)); else if (!isProfit && minProfit < 0) opacity = 0.2 + (0.8 * (day.profit / minProfit)); const bgColor = isProfit ? `rgba(34, 197, 94, ${opacity})` : `rgba(239, 68, 68, ${opacity})`; const borderColor = isProfit ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'; const tooltipPosition = (index + emptySlots) < 7 ? "top-full mt-2" : "bottom-full mb-2"; return ( <div key={day.date} className="group relative"> <div className="w-full aspect-square rounded-md border flex items-center justify-center transition hover:scale-105 cursor-pointer" style={{ backgroundColor: bgColor, borderColor: borderColor }}><span className="text-[10px] font-medium text-white/80 drop-shadow-md">{new Date(day.date).getDate()}</span></div> <div className={`absolute left-1/2 -translate-x-1/2 w-32 bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-neutral-200 opacity-0 group-hover:opacity-100 pointer-events-none transition z-50 shadow-xl ${tooltipPosition}`}><p className="font-bold text-center border-b border-neutral-800 pb-1 mb-1">{formatDate(day.date)}</p><div className="flex justify-between"><span>Winst:</span><span className={day.profit >= 0 ? "text-green-400" : "text-red-400"}>{currencySymbol}{day.profit.toFixed(0)}</span></div><div className="flex justify-between text-neutral-500"><span>ROI:</span><span>{day.roi !== null ? day.roi.toFixed(0) : 0}%</span></div></div> </div> ); })} </div> </div> ); }

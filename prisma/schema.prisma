@@ -9,7 +9,7 @@ datasource db {
 }
 
 // --------------------------------------
-// NIEUWE MODELLEN
+// MODELLEN
 // --------------------------------------
 
 // Je partners (AdCombo, ClickDealer, etc.)
@@ -18,7 +18,6 @@ model AffiliateNetwork {
   name          String   @unique 
   
   offers        Offer[]
-  // CORRECTIE: Verwijst nu naar Adjustment (was RevenueAdjustment)
   adjustments   Adjustment[] 
 
   createdAt     DateTime @default(now())
@@ -36,12 +35,13 @@ model Campaign {
 
   offers      Offer[]
   dailySpends DailySpend[]
-  
-  // Deze stond al goed
   adjustments Adjustment[]
   
   logs        DailyLog[]
   members     CampaignMember[]
+
+  // RELATIE TOEGEVOEGD:
+  annotations Annotation[]
 
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -52,7 +52,10 @@ model User {
   email     String   @unique
   password  String   
   name      String?
-  role      String   @default("USER") 
+  role      String   @default("USER")
+
+  // RELATIE TOEGEVOEGD:
+  annotations Annotation[]
   
   memberships CampaignMember[]
 }
@@ -65,14 +68,11 @@ model Adjustment {
   currency      String   @default("USD")
   description   String?
   type          String
-  // AANPASSINGEN:
-  exchangeRate  Float    @default(1.0)   // <--- NIEUW: Omrekenfactor naar USD
+  exchangeRate  Float    @default(1.0)
 
-  // CORRECTIE: Netwerk optioneel gemaakt (Int?), want finance tool gebruikt dit niet altijd
   networkId     Int?
   network       AffiliateNetwork? @relation(fields: [networkId], references: [id])
   
-  // CORRECTIE: Campaign verplicht gemaakt (Int), want een finance item hoort bij een project
   campaignId    Int
   campaign      Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
@@ -82,14 +82,9 @@ model Adjustment {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // Indexen voor snelheid
   @@index([campaignId])
   @@index([date])
 }
-
-// --------------------------------------
-// AANGEPASTE BESTAANDE MODELLEN
-// --------------------------------------
 
 model DailySpend {
   id           Int      @id @default(autoincrement())
@@ -124,7 +119,7 @@ model Offer {
   
   status        String       @default("ACTIVE") 
 
-  currency      String       @default("USD") // <--- DEZE REGEL TOEVOEGEN
+  currency      String       @default("USD")
   
   payoutLead    Float        @default(0)
   payoutSale    Float        @default(0)
@@ -136,8 +131,6 @@ model Offer {
   campaign      Campaign?    @relation(fields: [campaignId], references: [id])
 
   conversions   Conversion[]
-  
-  // CORRECTIE: Verwijst nu naar Adjustment (was RevenueAdjustment)
   adjustments   Adjustment[]
   
   createdAt     DateTime     @default(now())
@@ -159,8 +152,7 @@ model Conversion {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Dit is voor je import script (om dubbele te voorkomen)
-  externalId String?   @unique 
+  externalId String? @unique 
 
   @@unique([date, offerId], name: "date_offerId")
   @@index([date])
@@ -190,4 +182,19 @@ model CampaignMember {
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@unique([userId, campaignId]) 
+}
+
+model Annotation {
+  id          Int      @id @default(autoincrement())
+  text        String   
+  date        DateTime 
+  createdAt   DateTime @default(now())
+  
+  campaignId  Int
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([campaignId])
 }

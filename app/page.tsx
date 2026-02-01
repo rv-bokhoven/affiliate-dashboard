@@ -10,7 +10,7 @@ import {
   startOfYear, endOfYear, 
   parseISO, format, 
   endOfDay as dateFnsEndOfDay,
-  subDays, startOfDay, subYears // <--- subYears toegevoegd
+  subDays, startOfDay, subYears 
 } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
@@ -35,7 +35,7 @@ function getDateRange(range: string, from?: string, to?: string) {
   return { start: startOfMonth(now), end: getEndOfDay(endOfMonth(now)) };
 }
 
-// NIEUW: Functie om de vorige periode te bepalen voor trends
+// Functie om de vorige periode te bepalen voor trends
 function getPreviousDateRange(range: string, currentStart: Date, currentEnd: Date) {
   const diff = currentEnd.getTime() - currentStart.getTime();
   
@@ -59,13 +59,13 @@ function getPreviousDateRange(range: string, currentStart: Date, currentEnd: Dat
       return { start: prevStart, end: prevEnd };
   }
 
-  // Fallback (Custom): Schuif datums terug met dezelfde duur
+  // Fallback (Custom)
   return { 
       start: new Date(currentStart.getTime() - diff), 
       end: new Date(currentEnd.getTime() - diff) 
   };
 }
-// Hulpfunctie endOfDay (duplicate fix, zat al bovenin maar voor zekerheid binnen scope prevRange)
+
 function endOfDay(date: Date) { return dateFnsEndOfDay(date); }
 
 
@@ -90,7 +90,6 @@ export default async function Page({
   const displayCurrency = params.currency === 'EUR' ? 'EUR' : 'USD';
   const currencySymbol = displayCurrency === 'EUR' ? '€' : '$';
 
-  // HULPFUNCTIE: Converteer bedragen
   const convert = (amount: number, itemCurrency: string, itemRate: number) => {
     const amountInUSD = itemCurrency === 'EUR' ? amount * itemRate : amount;
     if (displayCurrency === 'USD') return amountInUSD;
@@ -146,6 +145,18 @@ export default async function Page({
   const now = new Date();
   const currentMonthStart = startOfMonth(now);
   const currentMonthEnd = getEndOfDay(endOfMonth(now));
+
+  // NIEUW: ANNOTATIES OPHALEN
+  const annotations = await prisma.annotation.findMany({
+      where: {
+          campaignId: campaignId,
+          date: {
+              gte: start,
+              lte: end
+          }
+      },
+      orderBy: { date: 'asc' }
+  });
 
   const campaign = await prisma.campaign.findUnique({
     where: { id: campaignId },
@@ -226,7 +237,6 @@ export default async function Page({
       leads += conv.leads;
       sales += conv.sales;
 
-      // Update Chart
       const key = getGroupKey(conv.date, currentInterval);
       const current = chartMap.get(key) || { spend: 0, revenue: 0, leads: 0, sales: 0 };
       
@@ -277,23 +287,17 @@ export default async function Page({
   let prevSpend = 0;
 
   if (prevCampaignData) {
-      // Prev Spend
       prevCampaignData.dailySpends.forEach(s => {
           prevSpend += convert(s.amount, s.currency, s.exchangeRate);
       });
-
-      // Prev Revenue (Offers)
       prevCampaignData.offers.forEach(o => {
         const oRate = o.currency === 'EUR' ? EUR_USD_RATE : 1.0;
         const payLead = convert(o.payoutLead, o.currency || 'USD', oRate);
         const paySale = convert(o.payoutSale, o.currency || 'USD', oRate);
-        
         o.conversions.forEach(c => {
             prevRevenue += (c.leads * payLead) + (c.sales * paySale);
         });
       });
-
-      // Prev Revenue (Adjustments)
       prevCampaignData.adjustments.forEach(a => {
           prevRevenue += convert(a.amount, a.currency, a.exchangeRate);
       });
@@ -377,12 +381,17 @@ export default async function Page({
         spend: totalSpend, revenue: totalRevenue, profit, roi, 
         googleSpend, microsoftSpend, leads: totalLeads, sales: totalSales, revShare: totalRevShare
       }}
-      // NIEUWE PROP:
       trends={{
           revenue: prevRevenue,
           profit: prevProfit,
           spend: prevSpend
       }}
+      // NIEUW: Geef annotaties door aan de client
+      annotations={annotations.map(a => ({
+          id: a.id,
+          date: format(a.date, 'yyyy-MM-dd'),
+          text: a.text
+      }))}
       campaignName={campaign.name}
       campaignType={campaign.type || 'PAID'} 
       currencySymbol={currencySymbol}
