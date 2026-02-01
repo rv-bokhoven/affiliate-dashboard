@@ -465,7 +465,6 @@ export default function DashboardClient({
                                         yAxisId="left"
                                         stroke="#3b82f6" 
                                         strokeDasharray="3 3"
-                                        isFront={true} 
                                         ifOverflow="visible"
                                         strokeWidth={2}
                                         label={{ 
