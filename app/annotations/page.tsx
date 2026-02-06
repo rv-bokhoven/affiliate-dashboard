@@ -30,7 +30,7 @@ export default async function AnnotationsPage() {
         title="Annotations" 
         subtitle={`All campaign annotations for ${campaign?.name || 'Unknown Project'}`}
     >
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-full">
          <AnnotationManager campaignId={campaignId} />
       </div>
     </PageContainer>

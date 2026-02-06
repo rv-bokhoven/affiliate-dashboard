@@ -38,7 +38,10 @@ export default async function FinancePage() {
         subtitle={`Beheer inkomsten en correcties voor ${campaign?.name}`}
     >
         {/* Geef de offers door aan het component */}
+
         <FinanceManager campaignId={campaignId} offers={offers} />
+
     </PageContainer>
+
   );
 }

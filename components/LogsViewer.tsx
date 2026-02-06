@@ -106,7 +106,7 @@ export default function LogsViewer({ logs, campaignName, offerMap }: LogsViewerP
   };
 
   return (
-    <PageContainer title="Logs & History" subtitle={`Recente invoer voor ${campaignName}`}>
+
       
       <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-left text-sm text-neutral-400">
@@ -152,6 +152,6 @@ export default function LogsViewer({ logs, campaignName, offerMap }: LogsViewerP
         </table>
       </div>
 
-    </PageContainer>
+
   );
 }

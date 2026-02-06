@@ -115,7 +115,7 @@ export default function FinanceManager({ campaignId, offers }: { campaignId: num
   const total = items.reduce((acc, item) => acc + item.amount, 0);
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-full">
       
       {/* HEADER */}
       <div className="flex items-center justify-between mb-8 bg-neutral-900/50 p-4 rounded-xl border border-neutral-800">
