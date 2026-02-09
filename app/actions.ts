@@ -63,3 +63,73 @@ export async function deleteAnnotation(id: number) {
     await prisma.annotation.delete({ where: { id } });
     revalidatePath('/logs');
 }
+
+// --- MANUAL LOGBOOK ---
+
+export async function addManualLog(
+  campaignId: number, 
+  date: string, 
+  platform: string,         // <-- Nieuw
+  externalCampaign: string, // <-- Nieuw
+  offerName: string,
+  leads: number,
+  sales: number,
+  revenue: number
+) {
+  const session = await getSession();
+  if (!session) throw new Error('Unauthorized');
+
+  await prisma.manualLog.create({
+    data: {
+      campaignId,
+      date: new Date(date),
+      platform,             // Opslaan
+      externalCampaign,     // Opslaan
+      offerName,
+      leads,
+      sales,
+      revenue
+    }
+  });
+
+  revalidatePath('/manual');
+  return { success: true };
+}
+
+export async function deleteManualLog(id: number) {
+  const session = await getSession();
+  if (!session) return;
+
+  await prisma.manualLog.delete({ where: { id } });
+  revalidatePath('/manual');
+}
+
+export async function updateManualLog(
+  id: number,
+  date: string,
+  platform: string,
+  externalCampaign: string,
+  offerName: string,
+  leads: number,
+  sales: number,
+  revenue: number
+) {
+  const session = await getSession();
+  if (!session) throw new Error('Unauthorized');
+
+  await prisma.manualLog.update({
+    where: { id },
+    data: {
+      date: new Date(date),
+      platform,
+      externalCampaign,
+      offerName,
+      leads,
+      sales,
+      revenue
+    }
+  });
+
+  revalidatePath('/manual');
+  return { success: true };
+}
